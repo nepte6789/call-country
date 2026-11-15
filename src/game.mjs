@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { rewardSpeech } from "./reward-text.mjs";
+import { rewardSpeech, welcomeSpeech } from "./reward-text.mjs";
 export const normalize = (s) => {
   const text = String(s ?? " ").trim();
   if (/^[+-]?\d+(?:[.,]\d+)?$/.test(text))
@@ -48,11 +48,59 @@ export class Game {
     this.quizPhase = "question";
     this.quizDeadline = now() + this.config.quizSeconds * 1000;
     this.lastWinner = null;
+    this.welcomed = new Map();
+    this.pendingWelcomes = new Map();
+    this.welcomeNextAt = null;
     this.aliases = provinces
       .flatMap((p) =>
         [p.name, ...p.aliases].map((a) => ({ text: normalize(a), id: p.id })),
       )
       .sort((a, b) => b.text.length - a.text.length);
+  }
+  member(data, eventId) {
+    if (
+      this.paused ||
+      !this.once(eventId) ||
+      data?.id === undefined ||
+      !String(data.id).trim()
+    )
+      return;
+    const id = String(data.id),
+      last = this.welcomed.get(id);
+    if (last !== undefined && this.now() - last < 120000) return;
+    this.welcomed.set(id, this.now());
+    if (this.welcomed.size > 5000)
+      this.welcomed.delete(this.welcomed.keys().next().value);
+    this.pendingWelcomes.set(id, {
+      id,
+      name: String(data.name || id).slice(0, 60),
+      avatar: safeAvatar(data.avatar),
+      demo: !!data.demo,
+      at: this.now(),
+    });
+    if (this.pendingWelcomes.size > 1000)
+      this.pendingWelcomes.delete(this.pendingWelcomes.keys().next().value);
+    if (this.welcomeNextAt === null) this.welcomeNextAt = this.now() + 1500;
+  }
+  flushWelcomes() {
+    if (
+      !this.pendingWelcomes.size ||
+      this.welcomeNextAt === null ||
+      this.now() < this.welcomeNextAt
+    )
+      return;
+    const people = [...this.pendingWelcomes.values()].filter(
+      (p) => this.now() - p.at < 20000,
+    );
+    this.pendingWelcomes.clear();
+    if (!people.length) return;
+    const names = people.slice(0, 4).map((p) => p.name),
+      text = welcomeSpeech(names, people.length);
+    this.welcomeNextAt = this.now() + 10000;
+    this.event("welcome", people[0], text, 0, {
+      speech: text,
+      welcomeCount: people.length,
+    });
   }
   findProvince(text) {
     const clean = " " + normalize(text) + " ";
@@ -389,9 +437,12 @@ export class Game {
     for (const [id, u] of this.users) if (u.demo) this.users.delete(id);
     this.events = this.events.filter((e) => !e.demo);
     this.feed = this.feed.filter((e) => !e.demo);
+    for (const [id, p] of this.pendingWelcomes)
+      if (p.demo) this.pendingWelcomes.delete(id);
   }
   tick() {
     if (this.paused) return;
+    this.flushWelcomes();
     if (this.now() >= this.deadline) {
       const r = this.rankings();
       this.lastWinner = r[0].lit ? { ...r[0], round: this.round } : null;

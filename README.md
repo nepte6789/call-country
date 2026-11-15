@@ -42,7 +42,7 @@ PORT=3000
 - Ván mặc định 20 phút, tự ghi quê dẫn đầu rồi mở ván mới. Tạm dừng thì ngừng nhận điểm và giữ đồng hồ. Đổi thời gian sẽ đếm lại ván từ lúc lưu.
 - Có 1–100 người thử, tự chọn quê/thả tim/tặng quà mô phỏng. Khi bật người thử, lấy số lượng khởi đầu đã đặt (mặc định 12), rồi cứ 3 phút tăng thêm ngẫu nhiên 1–2 người, tối đa 100. Khi tạm dừng, đồng hồ thêm người cũng dừng; tắt hoặc xóa người thử sẽ dừng lịch tự thêm. Xóa người thử chỉ trừ đóng góp của người thử, giữ điểm người thật. Không tạo bình luận/tim/quà hoặc người xem trên TikTok.
 
-Bấm “Bật đọc câu hỏi và phần thưởng” để đọc chào người mới, quà, câu trả lời đúng và thưởng theo dõi bằng giọng Việt cài trên trình duyệt/máy. Không có giọng Việt thì giao diện vẫn hoạt động; không tự tải giọng từ dịch vụ bên ngoài. Không kèm nhạc có bản quyền hoặc âm thanh từ hai video mẫu.
+Bấm “Bật giọng đọc và nhạc nền” để đọc chào người mới, quà, câu trả lời đúng và thưởng theo dõi bằng giọng Việt cài trên trình duyệt/máy. Không có giọng Việt thì giao diện vẫn hoạt động; không tự tải giọng từ dịch vụ bên ngoài. Không kèm nhạc có bản quyền hoặc âm thanh từ hai video mẫu.
 
 ## Dữ liệu bản đồ
 
@@ -69,3 +69,15 @@ Trả lời đúng một câu có đáp án trùng tên tỉnh/thành sẽ giữ
 Bấm bật giọng trên overlay để đọc câu hỏi ngay khi mở. Phần đọc nằm trong 20 giây trả lời, không cộng thêm thời gian sau khi đọc xong. Giọng đọc câu hỏi được ưu tiên hơn phần cảm ơn đang chờ; nếu đang đọc dở một lời thưởng, lời đó được giữ lại để đọc tiếp từ đầu sau câu hỏi. Không đọc tiếp một câu hỏi đã hết giờ.
 
 Hết 20 giây: ngừng chấm câu hỏi đó, công bố đáp án và nghỉ 10 giây. Hết 10 giây mới mở câu tiếp theo. Tim, quà và chọn quê vẫn hoạt động trong khoảng nghỉ; đáp án gửi lúc nghỉ không có điểm câu hỏi. Nút “Câu tiếp theo” của người điều khiển có thể chủ động bỏ qua thời gian nghỉ.
+
+### Chào người mới và nhạc nền
+
+Nhận sự kiện người vào từ TikTok LIVE, chào tên và nhắc bình luận tên quê để thắp sáng bản đồ. Không tự chọn quê hoặc cộng điểm chỉ vì vào xem. Nhiều người đến cùng lúc được gộp tối đa 4 tên và số người còn lại; cách tối thiểu 10 giây giữa các đợt chào, không lặp cùng người trong 2 phút và không đọc lời chào đã cũ quá 20 giây. Có nút “Thử người vào LIVE” để kiểm tra. Khả năng nhận đầy đủ người vào phụ thuộc sự kiện TikTok gửi, không suy ra từ danh sách người xem trong ảnh.
+
+Bấm “Bật giọng đọc và nhạc nền” một lần trên overlay. Nhạc Sunshine Homecoming vui nhộn, tự tổng hợp trong trình duyệt, không dùng bản thu hay sample bên thứ ba. Mức nhạc mặc định 18%, tối đa 35%, tự giảm còn 16% mức đang đặt trong khi đọc câu hỏi/lời chào/phần thưởng. Nút bật/tắt và thanh âm lượng nhạc độc lập với giọng đọc.
+
+Bot tặng quà ít hơn: xác suất mỗi lượt tương tác từ 20% còn 10%, cách ít nhất 20 giây giữa các quà mô phỏng. Tim/bình luận và lịch thêm 1–2 bot sau 3 phút giữ nguyên. Thay đổi này không giảm điểm hoặc tần suất nhận quà thật.
+
+### Hiệu ứng quê được cộng điểm
+
+Bất kỳ điểm đã được cộng về quê (tim, quà, trả lời đúng, theo dõi, điểm chờ, chọn quê lần đầu) đều làm vùng đó sáng nhấp nháy nhẹ, có vòng sáng lan và số +điểm bay lên. Camera zoom 1,32 lần và bay tới quê trong khoảng 4,2 giây rồi tự trở lại bản đồ tổng thể. Nhiều điểm cho cùng quê được gộp, không liên tục giật zoom; các quê khác được xếp lượt, bỏ lượt quá cũ khi tương tác dồn dập. Lời chào người vào và quà chưa chọn quê không kích hoạt zoom điểm. Chế độ giảm chuyển động của trình duyệt giữ viền sáng và điểm, tắt bay/nhấp nháy.

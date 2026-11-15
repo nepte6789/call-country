@@ -32,3 +32,10 @@ export function rewardSpeech({
     return `${who} ơi, ${points} điểm đang chờ đã được chuyển về quê ${home}.`;
   return "";
 }
+
+export function welcomeSpeech(names, total = names.length) {
+  const people = names.map(clean).filter(Boolean),
+    extra = Math.max(0, total - people.length);
+  const who = people.join(", ") + (extra ? ` và ${extra} người bạn khác` : "");
+  return `Chào mừng ${who || "các bạn"} đến với buổi LIVE! ${total === 1 ? "Bạn" : "Các bạn"} bình luận tên quê mình để cùng thắp sáng bản đồ Việt Nam nhé.`;
+}

@@ -16,6 +16,8 @@ let provinces = [],
   giftUntil = 0,
   spotUntil = 0,
   voice = false,
+  music = null,
+  musicContext = null,
   renderKey = "",
   lastRound = 0,
   spokenQuizKey = "",
@@ -78,18 +80,107 @@ function initMap() {
   }
   if (state) render(state);
 }
-function focus(id) {
+function focus(id, score = false) {
+  if (!score && scoreFx.hasWork) return;
   const p = lookup.get(id);
   if (!p) return;
   focusId = id;
-  focusUntil = Date.now() + 5500;
+  focusUntil = Date.now() + (score ? 4200 : 5500);
   $("placeName").textContent = p.name;
   $("callout").hidden = false;
+  $("scoreCallout").textContent = "";
+  $("callout").querySelector("span").textContent = score
+    ? "QUÊ VỪA NHẬN ĐIỂM"
+    : "ĐANG GHÉ THĂM";
   const dx = Math.max(-70, Math.min(70, (310 - p.x) * 0.18)),
     dy = Math.max(-80, Math.min(80, (650 - p.y) * 0.1));
-  $("camera").style.transform = `translate(${dx}px,${dy}px) scale(1.06)`;
+  if (score && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const zoom = 1.32,
+      x = 320 - 350 - (p.x - 350) * zoom,
+      y = 650 - 700 - (p.y - 700) * zoom;
+    $("camera").style.transform = `translate(${x}px,${y}px) scale(${zoom})`;
+  } else
+    $("camera").style.transform = score
+      ? ""
+      : `translate(${dx}px,${dy}px) scale(1.06)`;
+}
+const scoreHighlights = new Map(),
+  scoreBursts = [];
+function flashScore(e) {
+  const p = lookup.get(e.province);
+  if (!p) return;
+  const previous = scoreHighlights.get(e.province),
+    now = Date.now();
+  paths.get(e.province)?.classList.add("score-gain");
+  scoreHighlights.set(e.province, {
+    until: now + 4200,
+    pulseAt: previous?.pulseAt || 0,
+  });
+  if (previous && now - previous.pulseAt < 700) return;
+  scoreHighlights.get(e.province).pulseAt = now;
+  let layer = $("scoreBursts");
+  if (!layer) {
+    layer = svg("g", { id: "scoreBursts", "pointer-events": "none" });
+    $("camera").append(layer);
+  }
+  const burst = svg("g", {
+    class: "score-burst",
+    transform: `translate(${p.x},${p.y})`,
+  });
+  for (let i = 0; i < 2; i++)
+    burst.append(
+      svg("circle", { r: 16, class: "score-wave " + (i ? "delayed" : "") }),
+    );
+  const points = svg("text", { x: 0, y: -34, class: "score-float" });
+  points.textContent = "+" + e.points.toLocaleString("vi-VN");
+  burst.append(points);
+  layer.append(burst);
+  scoreBursts.push({ el: burst, until: now + 2400 });
+  if (scoreBursts.length > 40) scoreBursts.shift().el.remove();
+}
+const scoreFx = new ScoreEffects({
+  onGain: flashScore,
+  onFocus: (e, enter) => {
+    if (enter) {
+      focus(e.province, true);
+      flashScore(e);
+    }
+    const total = state?.game.rankings.find((r) => r.id === e.province)?.points;
+    $("scoreCallout").textContent =
+      `+${e.points.toLocaleString("vi-VN")} điểm${total !== undefined ? " · Tổng " + total.toLocaleString("vi-VN") + " điểm" : ""}`;
+  },
+  onIdle: () => {
+    focusId = "";
+    focusUntil = 0;
+    $("camera").style.transform = "";
+    $("callout").hidden = true;
+    $("scoreCallout").textContent = "";
+  },
+});
+function tickScoreEffects() {
+  scoreFx.tick();
+  const now = Date.now();
+  for (const [id, entry] of scoreHighlights)
+    if (now >= entry.until) {
+      paths.get(id)?.classList.remove("score-gain");
+      scoreHighlights.delete(id);
+    }
+  for (let i = scoreBursts.length - 1; i >= 0; i--)
+    if (now >= scoreBursts[i].until) {
+      scoreBursts[i].el.remove();
+      scoreBursts.splice(i, 1);
+    }
+}
+function clearScoreEffects() {
+  scoreFx.clear();
+  for (const id of scoreHighlights.keys())
+    paths.get(id)?.classList.remove("score-gain");
+  scoreHighlights.clear();
+  scoreBursts.forEach((b) => b.el.remove());
+  scoreBursts.length = 0;
 }
 const rewardVoice = new RewardVoice({
+  onSpeaking: (active) => music?.duck(active),
   onWarning: (text) => {
     $("sound").textContent = text;
   },
@@ -122,6 +213,28 @@ function readQuizSpeech() {
   }
 }
 function showEvent(e) {
+  if (e.province && lookup.has(e.province) && e.points > 0) scoreFx.enqueue(e);
+  if (e.type === "welcome") {
+    $("spotlight").replaceChildren();
+    $("spotlight").append(avatar(e));
+    const body = document.createElement("div"),
+      name = document.createElement("b"),
+      text = document.createElement("span");
+    name.textContent =
+      e.welcomeCount > 1
+        ? "Chào mừng " + e.welcomeCount + " người bạn mới"
+        : "Chào mừng " + e.name;
+    text.textContent = "Bình luận tên quê mình để thắp sáng bản đồ nhé!";
+    body.append(name, text);
+    $("spotlight").append(body);
+    $("spotlight").hidden = Date.now() < giftUntil;
+    spotUntil = Date.now() + 6500;
+    speak(e.speech, 0, {
+      key: `welcome-${state.game.round}-${e.id}`,
+      expiresAt: Date.now() + 20000,
+    });
+  }
+
   if (e.type === "visit" || e.type === "join" || e.type === "light") {
     focus(e.province);
     $("spotlight").replaceChildren();
@@ -166,6 +279,11 @@ function showEvent(e) {
   }
 }
 function render(m) {
+  if (state && state.game.round === m.game.round) {
+    const previous = new Map(state.game.rankings.map((r) => [r.id, r.points]));
+    if (m.game.rankings.some((r) => r.points < (previous.get(r.id) || 0)))
+      clearScoreEffects();
+  }
   state = m;
   const g = m.game;
   offset = g.serverTime - Date.now();
@@ -343,6 +461,7 @@ function render(m) {
   }
   if (g.round !== lastRound) {
     rewardVoice.clear();
+    clearScoreEffects();
     lastRound = g.round;
     lastEvent = 0;
   }
@@ -353,6 +472,7 @@ function render(m) {
     lastEvent = Math.max(...fresh.map((e) => e.id));
     for (const e of fresh) showEvent(e);
   }
+  tickScoreEffects();
   readQuizSpeech();
   $("connection").textContent =
     m.live.status === "connected"
@@ -377,7 +497,8 @@ setInterval(() => {
       ),
     );
   }
-  if (now > focusUntil && focusId) {
+  tickScoreEffects();
+  if (now > focusUntil && focusId && !scoreFx.active) {
     focusId = "";
     $("camera").style.transform = "";
     $("callout").hidden = true;
@@ -392,7 +513,23 @@ setInterval(() => {
     second: "2-digit",
   }).format(new Date());
 }, 200);
-$("sound").onclick = () => {
+$("sound").onclick = async () => {
+  if (!music) {
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        musicContext = new AudioContextClass();
+        await musicContext.resume();
+        music = new HomeMusic(musicContext);
+        music.start();
+        $("musicControls").hidden = false;
+      }
+    } catch {
+      $("connection").textContent =
+        "Nhạc chưa bật được; thử bấm lại nút âm thanh";
+    }
+  } else if (musicContext.state !== "running") await musicContext.resume();
   voice = !voice;
   rewardVoice.setEnabled(voice);
   $("sound").textContent = voice ? "🔊 Giọng đọc: BẬT" : "🔇 Giọng đọc: TẮT";
@@ -420,3 +557,10 @@ fetch("/api/provinces")
     () =>
       ($("connection").textContent = "Không tải được bản đồ — tải lại trang"),
   );
+
+$("musicToggle").onclick = () => {
+  if (music)
+    $("musicToggle").textContent = music.toggle() ? "♫ Tắt nhạc" : "♫ Bật nhạc";
+};
+$("musicVolume").oninput = () =>
+  music?.setVolume(Number($("musicVolume").value) / 100);

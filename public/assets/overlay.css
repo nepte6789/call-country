@@ -146,7 +146,7 @@ header p {
 }
 #camera {
   transform-origin: 350px 700px;
-  transition: transform 1.8s cubic-bezier(0.2, 0.6, 0.2, 1);
+  transition: transform 1.2s cubic-bezier(0.2, 0.6, 0.2, 1);
 }
 .province {
   fill: #142e47;
@@ -647,4 +647,125 @@ footer {
 }
 .quiz.resting #quizReward {
   color: #8ba4b7;
+}
+
+#musicControls {
+  position: absolute;
+  left: 54px;
+  bottom: 83px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  border: 1px solid #a88a50;
+  background: #0d2a40;
+  color: #e2c78f;
+  font-size: 13px;
+}
+#musicControls button {
+  font: inherit;
+  background: transparent;
+  border: 0;
+  color: #efd69f;
+  cursor: pointer;
+  padding: 4px;
+}
+#musicControls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#musicVolume {
+  width: 95px;
+  accent-color: #e2bc75;
+}
+
+#scoreCallout {
+  display: block;
+  font-size: 17px;
+  color: #ffeab9;
+  margin-top: 5px;
+  letter-spacing: 0.3px;
+}
+#scoreCallout:empty {
+  display: none;
+}
+.province.score-gain {
+  stroke: #fff1b8;
+  stroke-width: 2;
+  animation: score-glimmer 1.4s ease-in-out infinite;
+}
+.score-wave {
+  fill: none;
+  stroke: #ffe7a2;
+  stroke-width: 2.5;
+  transform-origin: 0 0;
+  animation: score-wave 1.8s ease-out forwards;
+}
+.score-wave.delayed {
+  animation-delay: 0.25s;
+  opacity: 0;
+}
+.score-float {
+  text-anchor: middle;
+  fill: #ffebb0;
+  font-size: 30px;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: #082339;
+  stroke-width: 4px;
+  animation: score-float 2.3s ease-out forwards;
+}
+@keyframes score-glimmer {
+  0%,
+  100% {
+    fill: #d89b48;
+    filter: drop-shadow(0 0 3px #f6bc5c);
+  }
+  50% {
+    fill: #fff0ad;
+    filter: drop-shadow(0 0 12px #ffe086);
+  }
+}
+@keyframes score-wave {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(4);
+  }
+}
+@keyframes score-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  15%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .province.score-gain {
+    animation: none;
+    fill: #ffe7a2;
+    filter: none;
+  }
+  .score-wave,
+  .score-float {
+    animation: none;
+  }
+  .score-wave {
+    opacity: 0.5;
+  }
+  .score-wave.delayed {
+    display: none;
+  }
 }

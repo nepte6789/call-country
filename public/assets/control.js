@@ -25,7 +25,7 @@ function render(m) {
         }[m.live.status] || m.live.status);
   $("liveStatus").className = m.live.status === "connected" ? "ok" : "";
   $("stats").textContent =
-    `${g.lit}/34 tỉnh đã sáng · ${g.players} người · ${m.live.comments} bình luận LIVE`;
+    `${g.lit}/34 tỉnh đã sáng · ${g.players} người · ${m.live.comments} bình luận · ${m.live.joins || 0} lượt vào LIVE`;
   $("keyStatus").textContent = m.hasApiKey
     ? "✓ Đã nạp API key EulerStream trên server"
     : "Chưa có API key EulerStream (chỉ cần nếu dịch vụ ký yêu cầu).";
@@ -106,7 +106,7 @@ $("settings").onsubmit = (e) => {
   });
   notice("Đã gửi cài đặt. Đổi thời gian sẽ bắt đầu đếm lại từ thời điểm lưu.");
 };
-for (const kind of ["comment", "like", "gift", "follow"])
+for (const kind of ["comment", "member", "like", "gift", "follow"])
   $(kind).onclick = () =>
     send("simulate", {
       kind,
