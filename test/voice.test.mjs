@@ -74,3 +74,15 @@ test("expired or ended quiz speech does not play after the answer window", () =>
   assert.equal(q.items.length, 0);
   q.clear();
 });
+
+test("music ducking hooks fire during speech and restore after completion or cancellation", () => {
+  const { q, said } = setup(),
+    levels = [];
+  q.onSpeaking = (value) => levels.push(value);
+  q.enqueue("Lời chào");
+  said[0].onend();
+  assert.deepEqual(levels, [true, false]);
+  q.enqueue("Câu hỏi");
+  q.clear();
+  assert.deepEqual(levels, [true, false, true, false]);
+});

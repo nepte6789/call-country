@@ -35,6 +35,7 @@ let live = {
   comments: 0,
   likes: 0,
   gifts: 0,
+  joins: 0,
 };
 const aliases = new Map(),
   logs = [];
@@ -202,6 +203,11 @@ async function connect(value) {
       d.msgId || d.common?.msgId
         ? type + ":" + String(d.msgId || d.common.msgId)
         : undefined;
+  on(WebcastEvent.MEMBER, (d) => {
+    live.joins++;
+    const p = user(d);
+    if (p) game.member(p, id(d, "member"));
+  });
   on(WebcastEvent.CHAT, (d) => {
     live.comments++;
     const p = user(d);
@@ -324,7 +330,8 @@ async function command(m) {
         name: String(m.name || "Người thử"),
         demo: true,
       };
-      if (m.kind === "like") game.like(p, Number(m.count) || 10);
+      if (m.kind === "member") game.member(p);
+      else if (m.kind === "like") game.like(p, Number(m.count) || 10);
       else if (m.kind === "gift")
         game.gift(p, {
           giftId: "trial",

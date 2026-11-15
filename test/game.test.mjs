@@ -252,3 +252,51 @@ test("global pause freezes the quiz rest countdown and does not skip the next qu
   assert.equal(g.quizPhase, "question");
   assert.equal(g.quizIndex, 1);
 });
+
+test("member arrivals greet and invite a hometown comment without assigning points or a province", () => {
+  const { g, advance } = fixture();
+  g.member(user("new"), "join-1");
+  assert.equal(g.users.size, 0);
+  advance(1499);
+  g.tick();
+  assert.ok(!g.events.some((e) => e.type === "welcome"));
+  advance(1);
+  g.tick();
+  const e = g.events.find((e) => e.type === "welcome");
+  assert.match(e.speech, /Chào mừng Bạn new/);
+  assert.match(e.speech, /bình luận tên quê mình/);
+  assert.equal(g.snapshot().players, 0);
+  assert.equal(g.snapshot().lit, 0);
+});
+test("welcome batches group multiple arrivals and suppress duplicate rejoins for two minutes", () => {
+  const { g, advance } = fixture();
+  for (let i = 0; i < 6; i++) g.member(user(i), "join-" + i);
+  advance(1500);
+  g.tick();
+  let welcomes = g.events.filter((e) => e.type === "welcome");
+  assert.equal(welcomes.length, 1);
+  assert.equal(welcomes[0].welcomeCount, 6);
+  assert.match(welcomes[0].speech, /và 2 người bạn khác/);
+  g.member(user(0), "another");
+  advance(10000);
+  g.tick();
+  assert.equal(g.events.filter((e) => e.type === "welcome").length, 1);
+  advance(120000);
+  g.member(user(0), "rejoin");
+  g.tick();
+  assert.equal(g.events.filter((e) => e.type === "welcome").length, 2);
+});
+test("stale or removed simulated arrivals are not greeted later", () => {
+  const { g, advance } = fixture();
+  g.member(user("trial", true));
+  g.clearDemo();
+  advance(2000);
+  g.tick();
+  assert.ok(!g.events.some((e) => e.type === "welcome"));
+  g.member(user("real"));
+  g.pause(true);
+  advance(30000);
+  g.pause(false);
+  g.tick();
+  assert.ok(!g.events.some((e) => e.type === "welcome"));
+});

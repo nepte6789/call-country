@@ -2,10 +2,11 @@
 window.RewardVoice = class {
   constructor({
     onWarning = () => {},
+    onSpeaking = () => {},
     synth = window.speechSynthesis,
     makeUtterance = (text) => new SpeechSynthesisUtterance(text),
   } = {}) {
-    Object.assign(this, { synth, makeUtterance, onWarning });
+    Object.assign(this, { synth, makeUtterance, onWarning, onSpeaking });
     this.enabled = false;
     this.items = [];
     this.busy = false;
@@ -24,6 +25,7 @@ window.RewardVoice = class {
     clearTimeout(this.timer);
     this.busy = false;
     this.current = null;
+    this.onSpeaking(false);
     this.synth?.cancel();
   }
   clear() {
@@ -95,6 +97,7 @@ window.RewardVoice = class {
     u.rate = 1.04;
     u.pitch = 1;
     this.busy = true;
+    this.onSpeaking(true);
     let done = false;
     const finish = (error) => {
       if (done || generation !== this.generation) return;
@@ -102,6 +105,7 @@ window.RewardVoice = class {
       clearTimeout(this.timer);
       this.busy = false;
       this.current = null;
+      this.onSpeaking(false);
       if (
         error &&
         (message.expiresAt === null || Date.now() < message.expiresAt)

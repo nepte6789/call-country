@@ -19,6 +19,7 @@ export class Bots {
     this.target = 12;
     this.next = 0;
     this.serial = 0;
+    this.nextGiftAt = 0;
     this.nextJoinAt = null;
     this.pausedAt = null;
   }
@@ -28,6 +29,7 @@ export class Bots {
     this.enabled = !!on;
     this.target = Number(count);
     this.next = 0;
+    this.nextGiftAt = this.now() + 20000;
     this.nextJoinAt = this.enabled ? this.now() + 180000 : null;
     this.pausedAt = this.game.paused ? this.now() : null;
     if (on) {
@@ -74,6 +76,7 @@ export class Bots {
       const delta = this.now() - this.pausedAt;
       this.nextJoinAt += delta;
       this.next += delta;
+      this.nextGiftAt += delta;
       this.pausedAt = null;
     }
     if (this.nextJoinAt !== null && this.now() >= this.nextJoinAt) {
@@ -93,14 +96,15 @@ export class Bots {
     if (!p) return;
     const chance = this.random();
     if (chance < 0.65) g.like(p, 10 + Math.floor(this.random() * 40));
-    else if (chance < 0.85)
+    else if (chance < 0.75 && this.now() >= this.nextGiftAt) {
+      this.nextGiftAt = this.now() + 20000;
       g.gift(p, {
         giftId: "demo-" + this.now(),
         name: "Hoa hồng",
         coins: 1,
         count: 1,
       });
-    else
+    } else
       g.comment(
         p,
         g.provinces[Math.floor(this.random() * g.provinces.length)].name,

@@ -16,6 +16,8 @@ let provinces = [],
   giftUntil = 0,
   spotUntil = 0,
   voice = false,
+  music = null,
+  musicContext = null,
   renderKey = "",
   lastRound = 0,
   spokenQuizKey = "",
@@ -90,6 +92,7 @@ function focus(id) {
   $("camera").style.transform = `translate(${dx}px,${dy}px) scale(1.06)`;
 }
 const rewardVoice = new RewardVoice({
+  onSpeaking: (active) => music?.duck(active),
   onWarning: (text) => {
     $("sound").textContent = text;
   },
@@ -122,6 +125,27 @@ function readQuizSpeech() {
   }
 }
 function showEvent(e) {
+  if (e.type === "welcome") {
+    $("spotlight").replaceChildren();
+    $("spotlight").append(avatar(e));
+    const body = document.createElement("div"),
+      name = document.createElement("b"),
+      text = document.createElement("span");
+    name.textContent =
+      e.welcomeCount > 1
+        ? "Chào mừng " + e.welcomeCount + " người bạn mới"
+        : "Chào mừng " + e.name;
+    text.textContent = "Bình luận tên quê mình để thắp sáng bản đồ nhé!";
+    body.append(name, text);
+    $("spotlight").append(body);
+    $("spotlight").hidden = Date.now() < giftUntil;
+    spotUntil = Date.now() + 6500;
+    speak(e.speech, 0, {
+      key: `welcome-${state.game.round}-${e.id}`,
+      expiresAt: Date.now() + 20000,
+    });
+  }
+
   if (e.type === "visit" || e.type === "join" || e.type === "light") {
     focus(e.province);
     $("spotlight").replaceChildren();
@@ -392,7 +416,23 @@ setInterval(() => {
     second: "2-digit",
   }).format(new Date());
 }, 200);
-$("sound").onclick = () => {
+$("sound").onclick = async () => {
+  if (!music) {
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        musicContext = new AudioContextClass();
+        await musicContext.resume();
+        music = new HomeMusic(musicContext);
+        music.start();
+        $("musicControls").hidden = false;
+      }
+    } catch {
+      $("connection").textContent =
+        "Nhạc chưa bật được; thử bấm lại nút âm thanh";
+    }
+  } else if (musicContext.state !== "running") await musicContext.resume();
   voice = !voice;
   rewardVoice.setEnabled(voice);
   $("sound").textContent = voice ? "🔊 Giọng đọc: BẬT" : "🔇 Giọng đọc: TẮT";
@@ -420,3 +460,10 @@ fetch("/api/provinces")
     () =>
       ($("connection").textContent = "Không tải được bản đồ — tải lại trang"),
   );
+
+$("musicToggle").onclick = () => {
+  if (music)
+    $("musicToggle").textContent = music.toggle() ? "♫ Tắt nhạc" : "♫ Bật nhạc";
+};
+$("musicVolume").oninput = () =>
+  music?.setVolume(Number($("musicVolume").value) / 100);

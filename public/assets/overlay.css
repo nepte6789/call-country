@@ -648,3 +648,35 @@ footer {
 .quiz.resting #quizReward {
   color: #8ba4b7;
 }
+
+#musicControls {
+  position: absolute;
+  left: 54px;
+  bottom: 83px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  border: 1px solid #a88a50;
+  background: #0d2a40;
+  color: #e2c78f;
+  font-size: 13px;
+}
+#musicControls button {
+  font: inherit;
+  background: transparent;
+  border: 0;
+  color: #efd69f;
+  cursor: pointer;
+  padding: 4px;
+}
+#musicControls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#musicVolume {
+  width: 95px;
+  accent-color: #e2bc75;
+}

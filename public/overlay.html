@@ -106,10 +106,24 @@
         <span id="connection">● Đang kết nối server</span
         ><span id="clock"></span>
       </footer>
-      <button id="sound">🔊 Bật đọc câu hỏi và phần thưởng</button>
+      <button id="sound">🔊 Bật giọng đọc và nhạc nền</button>
+      <div id="musicControls" hidden>
+        <button id="musicToggle" type="button">♫ Tắt nhạc</button
+        ><label
+          >Nhạc nền
+          <input
+            id="musicVolume"
+            type="range"
+            min="0"
+            max="35"
+            value="18"
+            aria-label="Âm lượng nhạc nền"
+        /></label>
+      </div>
       <div id="pauseBanner" hidden>VÁN ĐANG TẠM DỪNG</div>
     </main>
     <script src="/assets/live-socket.js"></script>
+    <script src="/assets/home-music.js"></script>
     <script src="/assets/reward-voice.js"></script>
     <script src="/assets/overlay.js"></script>
   </body>

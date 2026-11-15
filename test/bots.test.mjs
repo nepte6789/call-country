@@ -69,3 +69,27 @@ test("pausing preserves remaining wait before the next bot batch", () => {
   bots.tick();
   assert.equal(game.users.size, 13);
 });
+
+test("bot gifts have a narrower chance and at least a twenty second cooldown", () => {
+  const { game, bots, advance } = setup(() => 0.7);
+  bots.configure(true, 1);
+  bots.tick();
+  assert.equal(game.events.filter((e) => e.type === "gift").length, 0);
+  advance(20000);
+  bots.tick();
+  assert.equal(game.events.filter((e) => e.type === "gift").length, 1);
+  advance(5000);
+  bots.tick();
+  assert.equal(game.events.filter((e) => e.type === "gift").length, 1);
+  advance(20000);
+  bots.tick();
+  assert.equal(game.events.filter((e) => e.type === "gift").length, 2);
+});
+test("chance formerly used for gifts now generates a hometown comment", () => {
+  const { game, bots, advance } = setup(() => 0.8);
+  bots.configure(true, 1);
+  advance(30000);
+  bots.tick();
+  assert.equal(game.events.filter((e) => e.type === "gift").length, 0);
+  assert.ok(game.feed.some((e) => e.type === "chat"));
+});
