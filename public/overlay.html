@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Thắp sáng Việt Nam · Call Country</title>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css" />
+    <link rel="stylesheet" href="/assets/overlay.css" />
+  </head>
+  <body>
+    <main id="stage">
+      <div class="grain"></div>
+      <header>
+        <div class="eyebrow">
+          <span class="pulse"></span> LIVE INTERACTIVE · 34 ĐIỂM HẸN QUÊ NHÀ
+          <span id="round">VÁN 01</span>
+        </div>
+        <h1>THẮP SÁNG<br /><em>VIỆT NAM</em><span class="star">✦</span></h1>
+        <p>Bình luận tên quê bạn. Cùng thắp một Việt Nam rực rỡ.</p>
+      </header>
+      <section class="stats">
+        <div>
+          <b id="lit">00<span>/34</span></b
+          ><small>TỈNH, THÀNH ĐÃ SÁNG</small>
+        </div>
+        <div><b id="population">0</b><small>NGƯỜI ĐỒNG HÀNH</small></div>
+        <div><b id="time">20:00</b><small>ĐẾM NGƯỢC VÁN</small></div>
+      </section>
+      <div class="progress"><i id="progress"></i></div>
+      <section class="map-scene">
+        <div class="orb"></div>
+        <div class="grid"></div>
+        <svg
+          id="map"
+          viewBox="0 0 700 1400"
+          aria-label="Bản đồ minh hoạ 34 tỉnh thành Việt Nam"
+        >
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="4" /></filter>
+            <radialGradient id="halo">
+              <stop stop-color="#ffd580" stop-opacity=".8" />
+              <stop offset="1" stop-color="#ffc04c" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="land" x2="1" y2="1">
+              <stop stop-color="#ffd982" />
+              <stop offset="1" stop-color="#c67726" />
+            </linearGradient>
+          </defs>
+          <g id="camera">
+            <g id="provinces"></g>
+            <g id="beacons"></g>
+            <g id="people"></g>
+          </g>
+        </svg>
+        <div class="sea-label">
+          BIỂN ĐÔNG<br /><small>Gửi một ngọn đèn về quê nhà</small>
+        </div>
+        <div class="map-caption">BẢN ĐỒ MINH HOẠ · KHÔNG DÙNG CHO ĐỊNH VỊ</div>
+        <div id="callout" hidden>
+          <span>ĐANG GHÉ THĂM</span><strong id="placeName"></strong>
+        </div>
+      </section>
+      <aside class="ranking glass">
+        <div class="section-heading">
+          <span>✦ ĐUA THẮP ĐÈN</span
+          ><small id="rankingCount">34 TỈNH, THÀNH</small>
+        </div>
+        <ol id="ranking"></ol>
+        <div class="ranking-foot">10 tim = 1 điểm · 1 xu quà = 1 điểm</div>
+      </aside>
+      <aside class="quiz glass">
+        <div class="section-heading">
+          <span>✦ ĐỐ VUI QUÊ MÌNH</span><small id="quizTime">60</small>
+        </div>
+        <p id="quizPrompt"></p>
+        <b>+10 điểm cho câu trả lời đúng</b>
+      </aside>
+      <div id="spotlight" class="spotlight" hidden></div>
+      <div id="giftToast" class="gift-toast" hidden></div>
+      <section class="bottom">
+        <div class="rules">
+          <span>♡ <b id="likeRule">10 TIM</b> = 1 ĐIỂM</span
+          ><span>🎁 QUÀ TẶNG = ĐIỂM CHO QUÊ</span
+          ><span>✦ GÕ TÊN TỈNH ĐỂ CHỌN QUÊ</span>
+        </div>
+        <div class="lower-grid">
+          <div class="chat glass">
+            <div class="section-heading">
+              <span>TRẠM TIN QUÊ NHÀ</span><small>LIVE CHAT</small>
+            </div>
+            <div id="chat"></div>
+          </div>
+          <div class="champion glass">
+            <span>NGỌN ĐÈN NỔI BẬT</span>
+            <div id="leaderName">Chờ quê bạn lên tiếng</div>
+            <p id="leaderScore">Mỗi lời gọi, một ngọn đèn.</p>
+            <small id="previousWinner"></small>
+          </div>
+        </div>
+      </section>
+      <footer>
+        <span id="connection">● Đang kết nối server</span
+        ><span id="clock"></span>
+      </footer>
+      <button id="sound">🔊 Bật lời chào quê nhà</button>
+      <div id="pauseBanner" hidden>VÁN ĐANG TẠM DỪNG</div>
+    </main>
+    <script src="/assets/live-socket.js"></script>
+    <script src="/assets/overlay.js"></script>
+  </body>
+</html>

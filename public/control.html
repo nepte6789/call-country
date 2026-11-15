@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Điều khiển · Thắp sáng Việt Nam</title>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css" />
+    <link rel="stylesheet" href="/assets/control.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <p>CALL COUNTRY / PHÒNG ĐIỀU HÀNH</p>
+        <h1>Thắp sáng Việt Nam<span>✦</span></h1>
+        <p>34 tỉnh, thành. Một bản đồ. Hàng ngàn lời gọi quê nhà.</p>
+      </div>
+      <a class="primary button" href="/overlay.html" target="vietnam-overlay"
+        >Mở màn hình LIVE ↗</a
+      >
+    </header>
+    <div class="statuses">
+      <span id="serverStatus">Server: chờ kết nối</span
+      ><span id="liveStatus">TikTok: chưa kết nối</span
+      ><span id="stats">0/34 tỉnh đã sáng</span>
+    </div>
+    <div id="notice" role="status"></div>
+    <main>
+      <section class="card connection">
+        <small>01 / KẾT NỐI</small>
+        <h2>Đưa LIVE vào bản đồ</h2>
+        <label>Link kênh hoặc @username</label>
+        <div class="row">
+          <input
+            id="channel"
+            placeholder="https://www.tiktok.com/@tenkenh/live"
+          /><button id="connect" class="primary">Kết nối</button
+          ><button id="disconnect">Ngắt</button>
+        </div>
+        <p id="autoStatus" class="hint">
+          Tự kết nối lại sau 2 phút nếu gián đoạn.
+        </p>
+        <p id="keyStatus" class="hint"></p>
+        <details>
+          <summary>Cách nhập EulerStream API key</summary>
+          <p>
+            Tạo file <code>.env</code> trong thư mục dự án, thêm
+            <code>EULERSTREAM_API_KEY=key_cua_ban</code> rồi khởi động lại.
+            Không gửi key vào bình luận hoặc quay màn hình có key.
+          </p>
+        </details>
+        <div class="instruction">
+          Bình luận tên tỉnh/thành để chọn quê. Tên cũ như
+          <b>Bình Định, Bến Tre, Hải Dương</b> được nhận theo tỉnh/thành sau sáp
+          nhập.
+        </div>
+      </section>
+      <section class="card">
+        <small>02 / NHỊP CUỘC ĐUA</small>
+        <h2>Mỗi điểm, một ngọn đèn</h2>
+        <form id="settings">
+          <div class="four">
+            <label
+              >Thời gian ván (phút)<input
+                id="minutes"
+                type="number"
+                min="1"
+                max="60"
+                value="20" /></label
+            ><label
+              >Tim / 1 điểm<input
+                id="likesPerPoint"
+                type="number"
+                min="1"
+                max="1000"
+                value="10" /></label
+            ><label
+              >Điểm / 1 xu quà<input
+                id="coinPoints"
+                type="number"
+                min="1"
+                max="1000"
+                value="1" /></label
+            ><label
+              >Điểm theo dõi<input
+                id="followPoints"
+                type="number"
+                min="1"
+                max="1000"
+                value="5"
+            /></label>
+          </div>
+          <div class="row">
+            <button class="primary">Lưu cài đặt</button
+            ><button type="button" id="pause">Tạm dừng</button
+            ><button type="button" id="reset" class="danger">
+              Ván mới / xóa điểm
+            </button>
+          </div>
+        </form>
+        <p class="hint">
+          Hết thời gian sẽ lưu quê dẫn đầu rồi tự mở ván mới. Câu đố đổi mỗi 60
+          giây, trả lời đúng +10 điểm. Mỗi người nhận điểm câu đố một lần.
+        </p>
+      </section>
+      <section class="card">
+        <small>03 / THỬ TRƯỚC KHI LIVE</small>
+        <h2>Gọi tên quê mình</h2>
+        <div class="two">
+          <label>Tên người thử<input id="simName" value="Minh Anh" /></label
+          ><label
+            >Quê / nội dung bình luận<input
+              id="simText"
+              value="Hà Nội"
+              list="provinces"
+          /></label>
+        </div>
+        <datalist id="provinces"></datalist>
+        <div class="row">
+          <button id="comment" class="primary">Gửi bình luận</button
+          ><button id="like">Thả 100 tim</button
+          ><button id="gift">Tặng 10 hoa hồng</button
+          ><button id="follow">Theo dõi</button>
+        </div>
+        <div class="row">
+          <label class="inline"
+            >Người thử tự động<input
+              id="botCount"
+              type="number"
+              min="1"
+              max="100"
+              value="12" /></label
+          ><button id="bots">Bật người thử</button
+          ><button id="clearDemo" class="danger">Xóa toàn bộ người thử</button>
+        </div>
+        <p class="hint">
+          Người thử chỉ hoạt động trong game, không gửi bình luận hoặc quà lên
+          TikTok.
+        </p>
+      </section>
+      <section class="card">
+        <small>04 / ĐƯỜNG ĐUA</small>
+        <h2 id="roundTitle">Bảng xếp hạng</h2>
+        <div id="ranking" class="rankings"></div>
+      </section>
+      <section class="card full">
+        <small>05 / TÍN HIỆU TRỰC TIẾP</small>
+        <h2>Nhật ký & tương tác</h2>
+        <div class="two">
+          <div id="feed" class="feed"></div>
+          <pre id="logs"></pre>
+        </div>
+      </section>
+    </main>
+    <footer>
+      THẮP SÁNG VIỆT NAM · Bản đồ minh hoạ 34 tỉnh thành · Hình học
+      geoBoundaries (Public Domain) · Không dùng để định vị
+    </footer>
+    <script src="/assets/live-socket.js"></script>
+    <script src="/assets/control.js"></script>
+  </body>
+</html>
