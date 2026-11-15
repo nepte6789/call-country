@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { Game } from "../src/game.mjs";
+import { Game, QUESTIONS, normalize } from "../src/game.mjs";
 import { resolveLiveUser } from "../src/live-user.mjs";
 import { channelName } from "../src/auto-connect.mjs";
 const provinces = JSON.parse(
@@ -138,4 +138,69 @@ test("nested users and aliases normalize, channel validation and event deduplica
   g.like(user("1"), 100, "id");
   g.like(user("1"), 100, "id");
   assert.equal(g.users.get("1").points, 11);
+});
+
+test("simple quiz bank has 60 unique questions across six topics, with Vietnamese or numeric answers", () => {
+  assert.equal(QUESTIONS.length, 60);
+  assert.equal(new Set(QUESTIONS.map((q) => q.id)).size, 60);
+  assert.equal(new Set(QUESTIONS.map((q) => q.prompt)).size, 60);
+  assert.equal(new Set(QUESTIONS.map((q) => q.category)).size, 6);
+  assert.ok(
+    QUESTIONS.every(
+      (q) =>
+        q.answers.length &&
+        q.answers.every((a) => typeof a === "string" && a.trim()),
+    ),
+  );
+});
+test("quiz accepts numeric and accentless Vietnamese answers without ABC choices", () => {
+  const { g } = fixture();
+  g.comment(user("1"), "Hà Tĩnh");
+  g.configure({ quizCategory: "Toán nhẩm" });
+  g.comment(user("1"), "5");
+  assert.equal(g.users.get("1").points, 11);
+  g.comment(user("1"), "5");
+  assert.equal(g.users.get("1").points, 11);
+  g.nextQuiz();
+  g.comment(user("1"), "sau");
+  assert.equal(g.users.get("1").points, 21);
+  assert.notEqual(normalize("-5"), normalize("5"));
+  assert.notEqual(normalize("1.5"), normalize("15"));
+});
+test("correct province-name answer credits chosen home instead of switching province", () => {
+  const { g } = fixture();
+  g.comment(user("1"), "Hà Tĩnh");
+  g.comment(user("1"), "ha noi");
+  assert.equal(g.users.get("1").province, g.findProvince("Hà Tĩnh"));
+  assert.equal(g.rankings().find((p) => p.name === "Hà Tĩnh").points, 11);
+  g.comment(user("1"), "quê tôi Hà Nội");
+  assert.equal(g.users.get("1").province, g.findProvince("Hà Nội"));
+});
+test("quiz settings, previous answer reveal and deadline guard work", () => {
+  const { g, advance } = fixture();
+  g.configure({ quizSeconds: 10, quizPoints: 20, quizCategory: "Toán nhẩm" });
+  assert.equal(g.snapshot().quiz.reward, 20);
+  assert.equal(g.quizDeadline - g.now(), 10000);
+  g.comment(user("1"), "5");
+  assert.equal(g.users.get("1").pending, 20);
+  advance(10000);
+  g.comment(user("1"), "5");
+  assert.equal(g.users.get("1").pending, 20);
+  assert.equal(g.snapshot().quiz.previous.answer, "5");
+  assert.equal(g.snapshot().quiz.prompt, "10 - 4 = bao nhiêu?");
+  assert.equal(g.snapshot().quiz.answer, undefined);
+  assert.throws(() => g.configure({ quizCategory: "invalid" }));
+  assert.throws(() => g.configure({ quizSeconds: 1 }));
+});
+test("reward speech names the actual gift, quantity, score and province without display symbols", () => {
+  const { g } = fixture();
+  g.comment(user("1"), "Gia Lai");
+  g.gift(user("1"), { name: "Rose", count: 10 });
+  const e = g.events.at(-1);
+  assert.equal(e.giftCount, 10);
+  assert.match(e.speech, /10 bông hoa hồng/);
+  assert.match(e.speech, /Quê Gia Lai được cộng thêm 10 điểm/);
+  assert.doesNotMatch(e.speech, /[×+·]/);
+  g.follow(user("pending"));
+  assert.match(g.events.at(-1).speech, /Hãy bình luận tên quê/);
 });

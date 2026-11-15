@@ -14,9 +14,12 @@
         <h1>Thắp sáng Việt Nam<span>✦</span></h1>
         <p>34 tỉnh, thành. Một bản đồ. Hàng ngàn lời gọi quê nhà.</p>
       </div>
-      <a class="primary button" href="/overlay.html" target="vietnam-overlay"
-        >Mở màn hình LIVE ↗</a
-      >
+      <div class="header-actions">
+        <a class="button" href="#quizSection">Câu hỏi cộng điểm ↓</a>
+        <a class="primary button" href="/overlay.html" target="vietnam-overlay"
+          >Mở màn hình LIVE ↗</a
+        >
+      </div>
     </header>
     <div class="statuses">
       <span id="serverStatus">Server: chờ kết nối</span
@@ -142,8 +145,62 @@
         <h2 id="roundTitle">Bảng xếp hạng</h2>
         <div id="ranking" class="rankings"></div>
       </section>
+      <section class="card full quiz-manager" id="quizSection">
+        <small>05 / CÂU HỎI CỘNG ĐIỂM</small>
+        <h2>Đáp án tiếng Việt hoặc số</h2>
+        <p class="hint">
+          Người xem bình luận đáp án trực tiếp để nhận điểm cho quê đã chọn.
+          Nhận chữ có dấu hoặc không dấu; không cần A/B/C/D. Mỗi người nhận
+          thưởng một lần cho mỗi câu. Trả lời đúng không đổi quê đã chọn.
+        </p>
+        <form id="quizSettings">
+          <div class="quiz-settings-row">
+            <label
+              >Chủ đề<select id="quizCategory">
+                <option value="mixed">Tất cả chủ đề</option>
+              </select></label
+            ><label
+              >Giây mỗi câu<input
+                id="quizSeconds"
+                type="number"
+                min="10"
+                max="180"
+                value="60" /></label
+            ><label
+              >Điểm trả lời đúng<input
+                id="quizPoints"
+                type="number"
+                min="1"
+                max="1000"
+                value="10"
+            /></label>
+          </div>
+          <div class="row">
+            <button class="primary">Lưu cài đặt câu hỏi</button
+            ><button id="nextQuiz" type="button">Câu tiếp theo →</button
+            ><button id="tryQuiz" type="button">Thử trả lời đúng</button>
+          </div>
+        </form>
+        <div class="quiz-current">
+          <b id="quizCurrentPrompt">Đang tải câu hỏi…</b>
+          <p id="quizCurrentAnswer"></p>
+          <small id="quizCurrentStatus"></small>
+        </div>
+        <details>
+          <summary id="questionCount">Xem bộ câu hỏi</summary>
+          <div class="row">
+            <input
+              id="questionSearch"
+              placeholder="Tìm câu hỏi hoặc đáp án…"
+            /><button id="downloadQuestions" type="button">
+              Tải bộ câu hỏi JSON ↓
+            </button>
+          </div>
+          <div id="questionBank" class="question-bank"></div>
+        </details>
+      </section>
       <section class="card full">
-        <small>05 / TÍN HIỆU TRỰC TIẾP</small>
+        <small>06 / TÍN HIỆU TRỰC TIẾP</small>
         <h2>Nhật ký & tương tác</h2>
         <div class="two">
           <div id="feed" class="feed"></div>

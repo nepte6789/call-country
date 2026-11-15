@@ -16,7 +16,6 @@ let provinces = [],
   giftUntil = 0,
   spotUntil = 0,
   voice = false,
-  lastSpoken = 0,
   renderKey = "",
   lastRound = 0;
 const paths = new Map();
@@ -88,26 +87,13 @@ function focus(id) {
     dy = Math.max(-80, Math.min(80, (650 - p.y) * 0.1));
   $("camera").style.transform = `translate(${dx}px,${dy}px) scale(1.06)`;
 }
-function speak(text) {
-  if (
-    !voice ||
-    !("speechSynthesis" in window) ||
-    Date.now() - lastSpoken < 2500
-  )
-    return;
-  lastSpoken = Date.now();
-  const voices = speechSynthesis.getVoices().filter((v) => /^vi/i.test(v.lang)),
-    v = voices.find((v) => /hoai|linh|female/i.test(v.name)) || voices[0];
-  if (!v) {
-    $("sound").textContent = "Máy chưa cài giọng Việt";
-    return;
-  }
-  if (speechSynthesis.pending) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "vi-VN";
-  u.voice = v;
-  u.rate = 1.04;
-  speechSynthesis.speak(u);
+const rewardVoice = new RewardVoice({
+  onWarning: (text) => {
+    $("sound").textContent = text;
+  },
+});
+function speak(text, priority = 1) {
+  rewardVoice.enqueue(text, priority);
 }
 function showEvent(e) {
   if (e.type === "visit" || e.type === "join" || e.type === "light") {
@@ -128,8 +114,10 @@ function showEvent(e) {
     if (e.type === "visit")
       speak(
         `Chào ${e.name}, cùng thắp sáng ${lookup.get(e.province)?.name || "quê nhà"}.`,
+        0,
       );
   }
+  if (e.type === "follow" || e.type === "light") speak(e.speech);
   if (e.type === "gift" || e.type === "quiz") {
     $("giftToast").replaceChildren();
     $("giftToast").append(avatar(e));
@@ -148,7 +136,7 @@ function showEvent(e) {
     spotUntil = 0;
     giftUntil = Date.now() + 6000;
     if (e.province) focus(e.province);
-    speak(`${e.name}, ${e.text}.`);
+    speak(e.speech || `Chúc mừng ${e.name} nhận được ${e.points} điểm thưởng.`);
   }
 }
 function render(m) {
@@ -289,6 +277,13 @@ function render(m) {
       : "Mỗi lời gọi, một ngọn đèn.";
   }
   $("quizPrompt").textContent = g.quiz.prompt;
+  $("quizMeta").textContent =
+    `${g.quiz.category} · Câu ${g.quiz.number}/${g.quiz.total}`;
+  $("quizReward").textContent =
+    `Bình luận đáp án tiếng Việt hoặc số · Đúng +${g.quiz.reward} điểm`;
+  $("quizPrevious").textContent = g.quiz.previous
+    ? `Đáp án câu trước: ${g.quiz.previous.answer}`
+    : "";
   $("previousWinner").textContent = g.lastWinner
     ? `Dẫn đầu ván trước: ${g.lastWinner.name} · ${g.lastWinner.points}đ`
     : "";
@@ -310,6 +305,7 @@ function render(m) {
     $("chat").append(row);
   }
   if (g.round !== lastRound) {
+    rewardVoice.clear();
     lastRound = g.round;
     lastEvent = 0;
   }
@@ -332,14 +328,14 @@ setInterval(() => {
   if (state) {
     const g = state.game,
       remaining = g.paused
-        ? g.deadline - g.serverTime
+        ? g.deadline - g.pauseAt
         : g.deadline - (now + offset);
     $("time").textContent =
       `${String(Math.floor(Math.max(0, remaining) / 60000)).padStart(2, "0")}:${String(Math.floor(Math.max(0, remaining) / 1000) % 60).padStart(2, "0")}`;
     $("quizTime").textContent = Math.max(
       0,
       Math.ceil(
-        (g.quiz.deadline - (g.paused ? g.serverTime : now + offset)) / 1000,
+        (g.quiz.deadline - (g.paused ? g.pauseAt : now + offset)) / 1000,
       ),
     );
   }
@@ -360,7 +356,7 @@ setInterval(() => {
 }, 200);
 $("sound").onclick = () => {
   voice = !voice;
-  if (!voice && "speechSynthesis" in window) speechSynthesis.cancel();
+  rewardVoice.setEnabled(voice);
   $("sound").textContent = voice ? "🔊 Lời chào: BẬT" : "🔇 Lời chào: TẮT";
   if (voice) speak("Cùng thắp sáng Việt Nam, bình luận tên quê của bạn nhé.");
 };

@@ -1,7 +1,8 @@
 const $ = (id) => document.getElementById(id);
 let state = null,
   noticeTimer,
-  provinceList = [];
+  provinceList = [],
+  questionBank = [];
 const send = (cmd, data = {}) =>
   socket.send(JSON.stringify({ t: "control", cmd, ...data }));
 function notice(s) {
@@ -61,6 +62,14 @@ function render(m) {
     $("feed").append(p);
   }
   $("logs").textContent = m.logs.join("\n");
+  $("quizCurrentPrompt").textContent = g.quiz.prompt;
+  const question = questionBank.find((q) => q.id === g.quiz.questionId);
+  $("quizCurrentAnswer").textContent = question
+    ? `Đáp án: ${question.answers.join(" / ")}`
+    : "Đang tải đáp án…";
+  for (const k of ["quizCategory", "quizSeconds", "quizPoints"])
+    if (!$("quizSettings").contains(document.activeElement))
+      $(k).value = g.config[k];
 }
 const socket = new LiveSocket(
   "control",
@@ -140,3 +149,86 @@ fetch("/api/provinces")
     }
   })
   .catch(() => notice("Không tải được danh sách tỉnh/thành"));
+
+function renderQuestionBank() {
+  const term = $("questionSearch").value.toLocaleLowerCase("vi");
+  $("questionBank").replaceChildren();
+  for (const q of questionBank.filter((q) =>
+    (q.prompt + " " + q.answers.join(" "))
+      .toLocaleLowerCase("vi")
+      .includes(term),
+  )) {
+    const row = document.createElement("div"),
+      name = document.createElement("b"),
+      answer = document.createElement("span"),
+      meta = document.createElement("small");
+    row.className = "bank-question";
+    meta.textContent = q.category;
+    name.textContent = q.prompt;
+    answer.textContent = q.answers.join(" / ");
+    row.append(meta, name, answer);
+    $("questionBank").append(row);
+  }
+}
+$("questionSearch").oninput = renderQuestionBank;
+$("quizSettings").onsubmit = (e) => {
+  e.preventDefault();
+  send("configure", {
+    config: {
+      quizCategory: $("quizCategory").value,
+      quizSeconds: Number($("quizSeconds").value),
+      quizPoints: Number($("quizPoints").value),
+    },
+  });
+};
+$("nextQuiz").onclick = () => send("nextQuiz");
+$("tryQuiz").onclick = () => {
+  const q = questionBank.find((q) => q.id === state?.game.quiz.questionId);
+  if (q)
+    send("simulate", {
+      kind: "comment",
+      name: $("simName").value,
+      text: q.answers[0],
+    });
+};
+$("downloadQuestions").onclick = () => {
+  const url = URL.createObjectURL(
+      new Blob([JSON.stringify(questionBank, null, 2)], {
+        type: "application/json",
+      }),
+    ),
+    a = document.createElement("a");
+  a.href = url;
+  a.download = "call-country-questions.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+fetch("/api/questions")
+  .then((r) => {
+    if (!r.ok) throw Error("Không tải được câu hỏi");
+    return r.json();
+  })
+  .then((list) => {
+    questionBank = list;
+    for (const category of new Set(list.map((q) => q.category))) {
+      const o = document.createElement("option");
+      o.value = category;
+      o.textContent = category;
+      $("quizCategory").append(o);
+    }
+    $("questionCount").textContent =
+      `Xem ${list.length} câu hỏi · ${new Set(list.map((q) => q.category)).size} chủ đề`;
+    renderQuestionBank();
+    if (state) render(state);
+  })
+  .catch((e) => notice(e.message));
+setInterval(() => {
+  if (!state) return;
+  const g = state.game,
+    remaining = Math.max(
+      0,
+      Math.ceil((g.quiz.deadline - (g.paused ? g.pauseAt : Date.now())) / 1000),
+    );
+  $("quizCurrentStatus").textContent =
+    `${g.quiz.category} · Câu ${g.quiz.number}/${g.quiz.total} · ${remaining} giây · Đúng +${g.quiz.reward} điểm`;
+}, 250);
