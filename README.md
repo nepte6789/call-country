@@ -77,3 +77,7 @@ Nhận sự kiện người vào từ TikTok LIVE, chào tên và nhắc bình l
 Bấm “Bật giọng đọc và nhạc nền” một lần trên overlay. Nhạc Sunshine Homecoming vui nhộn, tự tổng hợp trong trình duyệt, không dùng bản thu hay sample bên thứ ba. Mức nhạc mặc định 18%, tối đa 35%, tự giảm còn 16% mức đang đặt trong khi đọc câu hỏi/lời chào/phần thưởng. Nút bật/tắt và thanh âm lượng nhạc độc lập với giọng đọc.
 
 Bot tặng quà ít hơn: xác suất mỗi lượt tương tác từ 20% còn 10%, cách ít nhất 20 giây giữa các quà mô phỏng. Tim/bình luận và lịch thêm 1–2 bot sau 3 phút giữ nguyên. Thay đổi này không giảm điểm hoặc tần suất nhận quà thật.
+
+### Hiệu ứng quê được cộng điểm
+
+Bất kỳ điểm đã được cộng về quê (tim, quà, trả lời đúng, theo dõi, điểm chờ, chọn quê lần đầu) đều làm vùng đó sáng nhấp nháy nhẹ, có vòng sáng lan và số +điểm bay lên. Camera zoom 1,32 lần và bay tới quê trong khoảng 4,2 giây rồi tự trở lại bản đồ tổng thể. Nhiều điểm cho cùng quê được gộp, không liên tục giật zoom; các quê khác được xếp lượt, bỏ lượt quá cũ khi tương tác dồn dập. Lời chào người vào và quà chưa chọn quê không kích hoạt zoom điểm. Chế độ giảm chuyển động của trình duyệt giữ viền sáng và điểm, tắt bay/nhấp nháy.
