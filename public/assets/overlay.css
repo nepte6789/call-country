@@ -593,3 +593,32 @@ footer {
   text-anchor: middle;
   filter: drop-shadow(0 0 8px #fbb64b);
 }
+
+.quiz .quiz-meta,
+.quiz .quiz-previous {
+  display: block;
+  border: 0;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  text-align: left;
+  font-size: 11px;
+  color: #9bb4c7;
+  padding: 0;
+  margin-top: 12px;
+}
+.quiz .quiz-previous {
+  color: #ffe0a0;
+}
+.quiz p {
+  font-size: 23px;
+}
+.quiz #quizReward {
+  display: block;
+  line-height: 1.6;
+  color: #ffda85;
+}
+.quiz {
+  border-color: #e5b65b;
+  box-shadow: 0 0 25px #ffbe3311;
+}

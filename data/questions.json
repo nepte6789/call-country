@@ -1,0 +1,362 @@
+[
+  {
+    "id": "q-001",
+    "category": "Việt Nam",
+    "prompt": "Thủ đô của Việt Nam là gì?",
+    "answers": ["Hà Nội"]
+  },
+  {
+    "id": "q-002",
+    "category": "Toán nhẩm",
+    "prompt": "2 + 3 = bao nhiêu?",
+    "answers": ["5", "Năm"]
+  },
+  {
+    "id": "q-003",
+    "category": "Đời sống",
+    "prompt": "Một tuần có bao nhiêu ngày?",
+    "answers": ["7", "Bảy", "Bảy ngày"]
+  },
+  {
+    "id": "q-004",
+    "category": "Con vật",
+    "prompt": "Con vật nào kêu meo meo?",
+    "answers": ["Mèo", "Con mèo"]
+  },
+  {
+    "id": "q-005",
+    "category": "Ăn uống",
+    "prompt": "Gạo được nấu chín với nước thường thành món gì?",
+    "answers": ["Cơm"]
+  },
+  {
+    "id": "q-006",
+    "category": "Thiên nhiên",
+    "prompt": "Mặt trời thường mọc ở hướng nào?",
+    "answers": ["Đông", "Hướng đông"]
+  },
+  {
+    "id": "q-007",
+    "category": "Việt Nam",
+    "prompt": "Quốc kỳ Việt Nam có nền màu gì?",
+    "answers": ["Đỏ", "Màu đỏ"]
+  },
+  {
+    "id": "q-008",
+    "category": "Toán nhẩm",
+    "prompt": "10 - 4 = bao nhiêu?",
+    "answers": ["6", "Sáu"]
+  },
+  {
+    "id": "q-009",
+    "category": "Đời sống",
+    "prompt": "Một giờ có bao nhiêu phút?",
+    "answers": ["60", "Sáu mươi", "Sáu mươi phút"]
+  },
+  {
+    "id": "q-010",
+    "category": "Con vật",
+    "prompt": "Con vật nào kêu gâu gâu?",
+    "answers": ["Chó", "Con chó"]
+  },
+  {
+    "id": "q-011",
+    "category": "Ăn uống",
+    "prompt": "Loại quả dài, vỏ thường vàng khi chín, khỉ rất thích ăn?",
+    "answers": ["Chuối", "Quả chuối", "Trái chuối"]
+  },
+  {
+    "id": "q-012",
+    "category": "Thiên nhiên",
+    "prompt": "Mặt trời thường lặn ở hướng nào?",
+    "answers": ["Tây", "Hướng tây"]
+  },
+  {
+    "id": "q-013",
+    "category": "Việt Nam",
+    "prompt": "Ngôi sao trên quốc kỳ Việt Nam có màu gì?",
+    "answers": ["Vàng", "Màu vàng"]
+  },
+  {
+    "id": "q-014",
+    "category": "Toán nhẩm",
+    "prompt": "3 × 4 = bao nhiêu?",
+    "answers": ["12", "Mười hai"]
+  },
+  {
+    "id": "q-015",
+    "category": "Đời sống",
+    "prompt": "Một ngày có bao nhiêu giờ?",
+    "answers": ["24", "Hai mươi bốn", "Hai mươi tư"]
+  },
+  {
+    "id": "q-016",
+    "category": "Con vật",
+    "prompt": "Con vật nào có vòi dài?",
+    "answers": ["Voi", "Con voi"]
+  },
+  {
+    "id": "q-017",
+    "category": "Ăn uống",
+    "prompt": "Loại nước chấm làm từ cá ủ với muối gọi là gì?",
+    "answers": ["Nước mắm"]
+  },
+  {
+    "id": "q-018",
+    "category": "Thiên nhiên",
+    "prompt": "Cây lúa cho chúng ta loại hạt nào?",
+    "answers": ["Gạo", "Hạt gạo", "Thóc", "Hạt thóc"]
+  },
+  {
+    "id": "q-019",
+    "category": "Việt Nam",
+    "prompt": "Trang phục truyền thống có hai tà dài của Việt Nam là gì?",
+    "answers": ["Áo dài"]
+  },
+  {
+    "id": "q-020",
+    "category": "Toán nhẩm",
+    "prompt": "20 : 5 = bao nhiêu?",
+    "answers": ["4", "Bốn"]
+  },
+  {
+    "id": "q-021",
+    "category": "Đời sống",
+    "prompt": "Đèn giao thông màu nào yêu cầu dừng lại?",
+    "answers": ["Đỏ", "Màu đỏ"]
+  },
+  {
+    "id": "q-022",
+    "category": "Con vật",
+    "prompt": "Con vật nào cho chúng ta mật ong?",
+    "answers": ["Ong", "Con ong"]
+  },
+  {
+    "id": "q-023",
+    "category": "Ăn uống",
+    "prompt": "Món có bánh phở, nước dùng, thịt bò hoặc gà gọi là gì?",
+    "answers": ["Phở"]
+  },
+  {
+    "id": "q-024",
+    "category": "Thiên nhiên",
+    "prompt": "Hoa thường được chưng Tết miền Nam, có màu vàng là hoa gì?",
+    "answers": ["Hoa mai", "Mai"]
+  },
+  {
+    "id": "q-025",
+    "category": "Việt Nam",
+    "prompt": "Tết cổ truyền lớn nhất của Việt Nam gọi là gì?",
+    "answers": ["Tết Nguyên đán", "Nguyên đán", "Tết âm lịch"]
+  },
+  {
+    "id": "q-026",
+    "category": "Toán nhẩm",
+    "prompt": "7 + 8 = bao nhiêu?",
+    "answers": ["15", "Mười lăm"]
+  },
+  {
+    "id": "q-027",
+    "category": "Đời sống",
+    "prompt": "Đồ vật đội khi đi xe máy để bảo vệ đầu là gì?",
+    "answers": ["Mũ bảo hiểm", "Nón bảo hiểm"]
+  },
+  {
+    "id": "q-028",
+    "category": "Con vật",
+    "prompt": "Con vật nào có mai, thường bò chậm?",
+    "answers": ["Rùa", "Con rùa"]
+  },
+  {
+    "id": "q-029",
+    "category": "Ăn uống",
+    "prompt": "Loại quả có nhiều múi, vỏ thường màu cam gọi là gì?",
+    "answers": ["Cam", "Quả cam", "Trái cam"]
+  },
+  {
+    "id": "q-030",
+    "category": "Thiên nhiên",
+    "prompt": "Hoa thường được chưng Tết miền Bắc, có màu hồng là hoa gì?",
+    "answers": ["Hoa đào", "Đào"]
+  },
+  {
+    "id": "q-031",
+    "category": "Việt Nam",
+    "prompt": "Loại nón truyền thống hình chóp, làm từ lá gọi là gì?",
+    "answers": ["Nón lá"]
+  },
+  {
+    "id": "q-032",
+    "category": "Toán nhẩm",
+    "prompt": "9 - 2 = bao nhiêu?",
+    "answers": ["7", "Bảy"]
+  },
+  {
+    "id": "q-033",
+    "category": "Đời sống",
+    "prompt": "Dùng vật gì để che mưa, có thể gấp lại và cầm trên tay?",
+    "answers": ["Ô", "Cái ô", "Dù", "Cây dù"]
+  },
+  {
+    "id": "q-034",
+    "category": "Con vật",
+    "prompt": "Con gà thường có bao nhiêu chân?",
+    "answers": ["2", "Hai", "Hai chân"]
+  },
+  {
+    "id": "q-035",
+    "category": "Ăn uống",
+    "prompt": "Nước tinh khiết khi đông lạnh tạo thành gì?",
+    "answers": ["Đá", "Nước đá", "Băng"]
+  },
+  {
+    "id": "q-036",
+    "category": "Thiên nhiên",
+    "prompt": "Loài hoa mọc trong đầm, thường có màu hồng hoặc trắng là hoa gì?",
+    "answers": ["Hoa sen", "Sen"]
+  },
+  {
+    "id": "q-037",
+    "category": "Việt Nam",
+    "prompt": "Đơn vị tiền tệ của Việt Nam là gì?",
+    "answers": ["Đồng", "Việt Nam đồng", "VND"]
+  },
+  {
+    "id": "q-038",
+    "category": "Toán nhẩm",
+    "prompt": "5 × 5 = bao nhiêu?",
+    "answers": ["25", "Hai mươi lăm"]
+  },
+  {
+    "id": "q-039",
+    "category": "Đời sống",
+    "prompt": "Dùng vật gì để chải răng?",
+    "answers": ["Bàn chải", "Bàn chải đánh răng"]
+  },
+  {
+    "id": "q-040",
+    "category": "Con vật",
+    "prompt": "Con nhện thường có bao nhiêu chân?",
+    "answers": ["8", "Tám", "Tám chân"]
+  },
+  {
+    "id": "q-041",
+    "category": "Ăn uống",
+    "prompt": "Muối ăn thường có vị gì?",
+    "answers": ["Mặn", "Vị mặn"]
+  },
+  {
+    "id": "q-042",
+    "category": "Thiên nhiên",
+    "prompt": "Nước rơi từ mây xuống mặt đất gọi là gì?",
+    "answers": ["Mưa", "Nước mưa"]
+  },
+  {
+    "id": "q-043",
+    "category": "Việt Nam",
+    "prompt": "Bánh vuông thường được gói vào dịp Tết gọi là gì?",
+    "answers": ["Bánh chưng"]
+  },
+  {
+    "id": "q-044",
+    "category": "Toán nhẩm",
+    "prompt": "18 : 3 = bao nhiêu?",
+    "answers": ["6", "Sáu"]
+  },
+  {
+    "id": "q-045",
+    "category": "Đời sống",
+    "prompt": "Một năm có bao nhiêu tháng?",
+    "answers": ["12", "Mười hai"]
+  },
+  {
+    "id": "q-046",
+    "category": "Con vật",
+    "prompt": "Con vật nào được gọi là chúa sơn lâm?",
+    "answers": ["Hổ", "Cọp", "Con hổ", "Con cọp"]
+  },
+  {
+    "id": "q-047",
+    "category": "Ăn uống",
+    "prompt": "Đường thường có vị gì?",
+    "answers": ["Ngọt", "Vị ngọt"]
+  },
+  {
+    "id": "q-048",
+    "category": "Thiên nhiên",
+    "prompt": "Cầu vồng thường được nói là có bao nhiêu màu?",
+    "answers": ["7", "Bảy", "Bảy màu"]
+  },
+  {
+    "id": "q-049",
+    "category": "Việt Nam",
+    "prompt": "Tết có đèn ông sao và bánh nướng, bánh dẻo gọi là gì?",
+    "answers": ["Trung thu", "Tết Trung thu"]
+  },
+  {
+    "id": "q-050",
+    "category": "Toán nhẩm",
+    "prompt": "Một chục có bao nhiêu đơn vị?",
+    "answers": ["10", "Mười"]
+  },
+  {
+    "id": "q-051",
+    "category": "Đời sống",
+    "prompt": "Số điện thoại gọi cứu hỏa ở Việt Nam là gì?",
+    "answers": ["114"]
+  },
+  {
+    "id": "q-052",
+    "category": "Con vật",
+    "prompt": "Con vật nào thường được nuôi để lấy sữa bò?",
+    "answers": ["Bò", "Con bò"]
+  },
+  {
+    "id": "q-053",
+    "category": "Ăn uống",
+    "prompt": "Quả chanh thường có vị gì?",
+    "answers": ["Chua", "Vị chua"]
+  },
+  {
+    "id": "q-054",
+    "category": "Thiên nhiên",
+    "prompt": "Lá cây thường có màu gì?",
+    "answers": ["Xanh", "Xanh lá", "Xanh lá cây", "Màu xanh", "Màu xanh lá cây"]
+  },
+  {
+    "id": "q-055",
+    "category": "Việt Nam",
+    "prompt": "Thành phố có cầu Rồng nổi tiếng là thành phố nào?",
+    "answers": ["Đà Nẵng"]
+  },
+  {
+    "id": "q-056",
+    "category": "Toán nhẩm",
+    "prompt": "Số đứng ngay sau số 99 là số nào?",
+    "answers": ["100", "Một trăm"]
+  },
+  {
+    "id": "q-057",
+    "category": "Đời sống",
+    "prompt": "Số điện thoại gọi cấp cứu y tế ở Việt Nam là gì?",
+    "answers": ["115"]
+  },
+  {
+    "id": "q-058",
+    "category": "Con vật",
+    "prompt": "Con vật nào có chiếc cổ rất dài?",
+    "answers": ["Hươu cao cổ", "Con hươu cao cổ"]
+  },
+  {
+    "id": "q-059",
+    "category": "Ăn uống",
+    "prompt": "Loại đồ uống thường pha từ lá trà gọi là gì?",
+    "answers": ["Trà", "Chè", "Nước trà", "Nước chè"]
+  },
+  {
+    "id": "q-060",
+    "category": "Thiên nhiên",
+    "prompt": "Hành tinh chúng ta đang sống có tên là gì?",
+    "answers": ["Trái Đất", "Địa cầu"]
+  }
+]

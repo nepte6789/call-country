@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
 import { WebSocketServer } from "ws";
-import { Game } from "./src/game.mjs";
+import { Game, QUESTIONS } from "./src/game.mjs";
 import { Bots } from "./src/bots.mjs";
 import { resolveLiveUser } from "./src/live-user.mjs";
 import {
@@ -99,6 +99,15 @@ const server = http.createServer((req, res) => {
     return;
   }
   const url = new URL(req.url, "http://localhost");
+  if (url.pathname === "/api/questions") {
+    res
+      .writeHead(200, {
+        "Content-Type": mime[".json"],
+        "Cache-Control": "no-store",
+      })
+      .end(JSON.stringify(QUESTIONS));
+    return;
+  }
   if (url.pathname === "/api/provinces") {
     res
       .writeHead(200, {
@@ -285,6 +294,9 @@ async function command(m) {
       break;
     case "configure":
       game.configure(m.config || {});
+      break;
+    case "nextQuiz":
+      game.nextQuiz();
       break;
     case "pause":
       game.pause(!game.paused);

@@ -1,5 +1,10 @@
-export const normalize = (s) =>
-  String(s ?? "")
+import fs from "node:fs";
+import { rewardSpeech } from "./reward-text.mjs";
+export const normalize = (s) => {
+  const text = String(s ?? " ").trim();
+  if (/^[+-]?\d+(?:[.,]\d+)?$/.test(text))
+    return String(Number(text.replace(",", ".")));
+  return String(s ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
@@ -7,23 +12,12 @@ export const normalize = (s) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+};
 const safeAvatar = (s) =>
   /^https?:\/\//i.test(String(s || "")) ? String(s) : "";
-const QUIZ = [
-  ["Thủ đô của Việt Nam là gì?", ["Hà Nội"]],
-  ["Vịnh nổi tiếng ở Quảng Ninh có tên gì?", ["Hạ Long", "Vịnh Hạ Long"]],
-  ["Phố cổ nổi tiếng thuộc Đà Nẵng sau sáp nhập là gì?", ["Hội An"]],
-  ["Loài hoa biểu tượng thường gắn với Việt Nam?", ["Hoa sen", "Sen"]],
-  [
-    "Bánh đặc sản Huế gói trong lá, làm từ bột lọc?",
-    ["Bánh bột lọc", "Bột lọc"],
-  ],
-  ["Thành phố nổi tiếng với cà phê ở Đắk Lắk?", ["Buôn Ma Thuột"]],
-  ["Đảo lớn nổi tiếng nay thuộc An Giang?", ["Phú Quốc"]],
-  ["Dòng sông chảy qua Huế có tên gì?", ["Sông Hương", "Hương"]],
-  ["Cầu nổi tiếng có hình rồng tại Đà Nẵng?", ["Cầu Rồng"]],
-  ["Lễ hội truyền thống tưởng nhớ các vua Hùng tổ chức ở đâu?", ["Phú Thọ"]],
-];
+export const QUESTIONS = JSON.parse(
+  fs.readFileSync(new URL("../data/questions.json", import.meta.url), "utf8"),
+);
 export class Game {
   constructor(provinces, { now = Date.now, random = Math.random } = {}) {
     this.provinces = provinces;
@@ -34,6 +28,9 @@ export class Game {
       likesPerPoint: 10,
       coinPoints: 1,
       followPoints: 5,
+      quizSeconds: 60,
+      quizPoints: 10,
+      quizCategory: "mixed",
     };
     this.users = new Map();
     this.round = 1;
@@ -45,6 +42,8 @@ export class Game {
     this.gifts = new Map();
     this.seen = new Map();
     this.quizIndex = 0;
+    this.quizCursor = 0;
+    this.previousQuiz = null;
     this.quizDeadline = now() + 60000;
     this.lastWinner = null;
     this.aliases = provinces
@@ -95,7 +94,7 @@ export class Game {
     if (this.seen.size > 10000) this.seen.delete(this.seen.keys().next().value);
     return true;
   }
-  event(type, p, text, points = 0) {
+  event(type, p, text, points = 0, details = {}) {
     const e = {
       id: ++this.serial,
       type,
@@ -107,26 +106,45 @@ export class Game {
       text: String(text).slice(0, 300),
       points,
       at: this.now(),
+      ...details,
     };
     this.events.push(e);
     this.feed.push(e);
     if (this.events.length > 40) this.events.shift();
     if (this.feed.length > 50) this.feed.shift();
   }
-  award(p, points, type, text) {
+  award(p, points, type, text, details = {}) {
     points = Math.max(0, Math.min(1000000, Math.floor(points)));
     if (!points) return;
     if (p.province) {
       p.credits[p.province] = (p.credits[p.province] || 0) + points;
       p.points += points;
     } else p.pending += points;
-    this.event(type, p, text, points);
+    const province =
+      this.provinces.find((v) => v.id === p.province)?.name || "";
+    this.event(type, p, text, points, {
+      ...details,
+      speech: rewardSpeech({
+        type,
+        name: p.name,
+        province,
+        points,
+        ...details,
+      }),
+    });
   }
   comment(data, text, eventId) {
     if (this.paused || !this.once(eventId)) return;
+    if (this.now() >= this.quizDeadline) this.nextQuiz();
     const p = this.user(data);
     if (!p) return;
-    const province = this.findProvince(text);
+    const q = this.currentQuiz(),
+      correct = q.answers.some(
+        (a) =>
+          normalize(a).replace(/\s+/g, "") ===
+          normalize(text).replace(/\s+/g, ""),
+      );
+    const province = correct && p.province ? null : this.findProvince(text);
     if (province) {
       const first = !p.province,
         changed = p.province !== province;
@@ -145,13 +163,14 @@ export class Game {
           "Gọi tên " + this.provinces.find((x) => x.id === province).name,
         );
     }
-    const q = QUIZ[this.quizIndex % QUIZ.length];
-    if (
-      p.quizAnswered !== this.quizIndex + 1 &&
-      q[1].some((a) => normalize(a) === normalize(text))
-    ) {
+    if (p.quizAnswered !== this.quizIndex + 1 && correct) {
       p.quizAnswered = this.quizIndex + 1;
-      this.award(p, 10, "quiz", "Trả lời đúng câu đố +10 điểm");
+      this.award(
+        p,
+        this.config.quizPoints,
+        "quiz",
+        `Trả lời đúng câu hỏi · +${this.config.quizPoints} điểm`,
+      );
     }
     this.event("chat", p, String(text).slice(0, 250));
   }
@@ -202,7 +221,8 @@ export class Game {
         p,
         delta * coins * this.config.coinPoints,
         "gift",
-        `${name} ×${delta} · +${delta * coins * this.config.coinPoints} điểm`,
+        `${name} ×${delta} · +${Math.min(1000000, delta * coins * this.config.coinPoints)} điểm`,
+        { giftName: String(name).slice(0, 100), giftCount: delta },
       );
   }
   follow(data, eventId) {
@@ -239,14 +259,73 @@ export class Game {
           a.name.localeCompare(b.name, "vi"),
       );
   }
+  quizPool() {
+    return this.config.quizCategory === "mixed"
+      ? QUESTIONS
+      : QUESTIONS.filter((q) => q.category === this.config.quizCategory);
+  }
+  currentQuiz() {
+    const pool = this.quizPool();
+    return pool[this.quizCursor % pool.length];
+  }
+  nextQuiz() {
+    const q = this.currentQuiz();
+    this.previousQuiz = {
+      prompt: q.prompt,
+      answer: q.answers[0],
+      at: this.now(),
+    };
+    this.quizCursor++;
+    this.quizIndex++;
+    this.quizDeadline =
+      (this.paused ? this.pauseAt : this.now()) +
+      this.config.quizSeconds * 1000;
+  }
   configure(config) {
+    const categories = [...new Set(QUESTIONS.map((q) => q.category))];
+    for (const [key, min, max] of [
+      ["quizSeconds", 10, 180],
+      ["quizPoints", 1, 1000],
+    ])
+      if (config[key] !== undefined) {
+        const n = Number(config[key]);
+        if (!Number.isInteger(n) || n < min || n > max)
+          throw Error(
+            "Thời gian câu hỏi phải từ 10–180 giây, điểm thưởng từ 1–1000",
+          );
+      }
+    if (
+      config.quizCategory !== undefined &&
+      config.quizCategory !== "mixed" &&
+      !categories.includes(config.quizCategory)
+    )
+      throw Error("Chủ đề câu hỏi không tồn tại");
+    if (config.quizPoints !== undefined)
+      this.config.quizPoints = Number(config.quizPoints);
+    const restart =
+      (config.quizSeconds !== undefined &&
+        Number(config.quizSeconds) !== this.config.quizSeconds) ||
+      (config.quizCategory !== undefined &&
+        config.quizCategory !== this.config.quizCategory);
+    if (config.quizSeconds !== undefined)
+      this.config.quizSeconds = Number(config.quizSeconds);
+    if (config.quizCategory !== undefined)
+      this.config.quizCategory = config.quizCategory;
+    if (restart) {
+      this.quizCursor = 0;
+      this.quizIndex++;
+      this.previousQuiz = null;
+      this.quizDeadline =
+        (this.paused ? this.pauseAt : this.now()) +
+        this.config.quizSeconds * 1000;
+    }
+
     if (config.minutes !== undefined) {
       const v = Number(config.minutes);
       if (!Number.isInteger(v) || v < 1 || v > 60)
         throw Error("Thời gian ván phải từ 1–60 phút");
       this.config.minutes = v;
-      this.deadline = this.now() + v * 60000;
-      if (this.paused) this.pauseAt = this.now();
+      this.deadline = (this.paused ? this.pauseAt : this.now()) + v * 60000;
     }
     for (const k of ["likesPerPoint", "coinPoints", "followPoints"])
       if (config[k] !== undefined) {
@@ -274,8 +353,10 @@ export class Game {
     this.events = [];
     this.feed = [];
     this.deadline = this.now() + this.config.minutes * 60000;
-    this.quizDeadline = this.now() + 60000;
+    this.quizDeadline = this.now() + this.config.quizSeconds * 1000;
     this.quizIndex++;
+    this.quizCursor++;
+    this.previousQuiz = null;
     if (this.paused) this.pauseAt = this.now();
   }
   clearDemo() {
@@ -291,8 +372,7 @@ export class Game {
       this.reset();
     }
     if (this.now() >= this.quizDeadline) {
-      this.quizIndex++;
-      this.quizDeadline = this.now() + 60000;
+      this.nextQuiz();
     }
   }
   snapshot() {
@@ -301,6 +381,7 @@ export class Game {
     return {
       round: this.round,
       paused: this.paused,
+      pauseAt: this.paused ? this.pauseAt : null,
       deadline: this.deadline,
       serverTime: this.now(),
       config: { ...this.config },
@@ -313,7 +394,16 @@ export class Game {
       lastWinner: this.lastWinner,
       quiz: {
         id: this.quizIndex + 1,
-        prompt: QUIZ[this.quizIndex % QUIZ.length][0],
+        questionId: this.currentQuiz().id,
+        prompt: this.currentQuiz().prompt,
+        category: this.currentQuiz().category,
+        number: (this.quizCursor % this.quizPool().length) + 1,
+        total: this.quizPool().length,
+        reward: this.config.quizPoints,
+        previous:
+          this.previousQuiz && this.now() - this.previousQuiz.at < 8000
+            ? this.previousQuiz
+            : null,
         deadline: this.quizDeadline,
       },
     };

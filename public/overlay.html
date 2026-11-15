@@ -72,8 +72,11 @@
         <div class="section-heading">
           <span>✦ ĐỐ VUI QUÊ MÌNH</span><small id="quizTime">60</small>
         </div>
+        <small id="quizMeta" class="quiz-meta"></small>
         <p id="quizPrompt"></p>
-        <b>+10 điểm cho câu trả lời đúng</b>
+        <b id="quizReward"
+          >Bình luận đáp án tiếng Việt hoặc số · Đúng +10 điểm</b
+        ><small id="quizPrevious" class="quiz-previous"></small>
       </aside>
       <div id="spotlight" class="spotlight" hidden></div>
       <div id="giftToast" class="gift-toast" hidden></div>
@@ -106,6 +109,7 @@
       <div id="pauseBanner" hidden>VÁN ĐANG TẠM DỪNG</div>
     </main>
     <script src="/assets/live-socket.js"></script>
+    <script src="/assets/reward-voice.js"></script>
     <script src="/assets/overlay.js"></script>
   </body>
 </html>
