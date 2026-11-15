@@ -28,7 +28,8 @@ export class Game {
       likesPerPoint: 10,
       coinPoints: 1,
       followPoints: 5,
-      quizSeconds: 60,
+      quizSeconds: 20,
+      quizRestSeconds: 10,
       quizPoints: 10,
       quizCategory: "mixed",
     };
@@ -44,7 +45,8 @@ export class Game {
     this.quizIndex = 0;
     this.quizCursor = 0;
     this.previousQuiz = null;
-    this.quizDeadline = now() + 60000;
+    this.quizPhase = "question";
+    this.quizDeadline = now() + this.config.quizSeconds * 1000;
     this.lastWinner = null;
     this.aliases = provinces
       .flatMap((p) =>
@@ -135,16 +137,18 @@ export class Game {
   }
   comment(data, text, eventId) {
     if (this.paused || !this.once(eventId)) return;
-    if (this.now() >= this.quizDeadline) this.nextQuiz();
+    this.tickQuiz();
     const p = this.user(data);
     if (!p) return;
     const q = this.currentQuiz(),
-      correct = q.answers.some(
+      answerMatches = q.answers.some(
         (a) =>
           normalize(a).replace(/\s+/g, "") ===
           normalize(text).replace(/\s+/g, ""),
       );
-    const province = correct && p.province ? null : this.findProvince(text);
+    const correct = this.quizPhase === "question" && answerMatches;
+    const province =
+      answerMatches && p.province ? null : this.findProvince(text);
     if (province) {
       const first = !p.province,
         changed = p.province !== province;
@@ -268,18 +272,38 @@ export class Game {
     const pool = this.quizPool();
     return pool[this.quizCursor % pool.length];
   }
-  nextQuiz() {
+  finishQuiz() {
+    if (this.quizPhase !== "question") return;
     const q = this.currentQuiz();
     this.previousQuiz = {
       prompt: q.prompt,
       answer: q.answers[0],
       at: this.now(),
     };
+    this.quizPhase = "rest";
+    this.quizDeadline += this.config.quizRestSeconds * 1000;
+  }
+  nextQuiz() {
+    if (this.quizPhase === "question") {
+      const q = this.currentQuiz();
+      this.previousQuiz = {
+        prompt: q.prompt,
+        answer: q.answers[0],
+        at: this.now(),
+      };
+    }
     this.quizCursor++;
     this.quizIndex++;
+    this.quizPhase = "question";
     this.quizDeadline =
       (this.paused ? this.pauseAt : this.now()) +
       this.config.quizSeconds * 1000;
+  }
+  tickQuiz() {
+    if (this.paused || this.now() < this.quizDeadline) return;
+    if (this.quizPhase === "question") this.finishQuiz();
+    if (this.quizPhase === "rest" && this.now() >= this.quizDeadline)
+      this.nextQuiz();
   }
   configure(config) {
     const categories = [...new Set(QUESTIONS.map((q) => q.category))];
@@ -315,6 +339,7 @@ export class Game {
       this.quizCursor = 0;
       this.quizIndex++;
       this.previousQuiz = null;
+      this.quizPhase = "question";
       this.quizDeadline =
         (this.paused ? this.pauseAt : this.now()) +
         this.config.quizSeconds * 1000;
@@ -353,6 +378,7 @@ export class Game {
     this.events = [];
     this.feed = [];
     this.deadline = this.now() + this.config.minutes * 60000;
+    this.quizPhase = "question";
     this.quizDeadline = this.now() + this.config.quizSeconds * 1000;
     this.quizIndex++;
     this.quizCursor++;
@@ -371,9 +397,7 @@ export class Game {
       this.lastWinner = r[0].lit ? { ...r[0], round: this.round } : null;
       this.reset();
     }
-    if (this.now() >= this.quizDeadline) {
-      this.nextQuiz();
-    }
+    this.tickQuiz();
   }
   snapshot() {
     const rankings = this.rankings(),
@@ -394,6 +418,10 @@ export class Game {
       lastWinner: this.lastWinner,
       quiz: {
         id: this.quizIndex + 1,
+        phase: this.quizPhase,
+        ...(this.quizPhase === "rest"
+          ? { answer: this.currentQuiz().answers[0] }
+          : {}),
         questionId: this.currentQuiz().id,
         prompt: this.currentQuiz().prompt,
         category: this.currentQuiz().category,
@@ -401,7 +429,9 @@ export class Game {
         total: this.quizPool().length,
         reward: this.config.quizPoints,
         previous:
-          this.previousQuiz && this.now() - this.previousQuiz.at < 8000
+          this.previousQuiz &&
+          (this.quizPhase === "rest" ||
+            this.now() - this.previousQuiz.at < 8000)
             ? this.previousQuiz
             : null,
         deadline: this.quizDeadline,

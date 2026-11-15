@@ -1,4 +1,4 @@
-// Serial playback prevents a second reward from interrupting or silently replacing the first.
+// Serial rewards; timed questions may interrupt and resume the current reward.
 window.RewardVoice = class {
   constructor({
     onWarning = () => {},
@@ -9,6 +9,7 @@ window.RewardVoice = class {
     this.enabled = false;
     this.items = [];
     this.busy = false;
+    this.current = null;
     this.generation = 0;
     this.timer = null;
     this.synth?.addEventListener?.("voiceschanged", () => this.drain());
@@ -18,24 +19,61 @@ window.RewardVoice = class {
     if (!this.enabled) this.clear();
     else this.drain();
   }
-  clear() {
+  cancelCurrent() {
     this.generation++;
     clearTimeout(this.timer);
-    this.items = [];
     this.busy = false;
+    this.current = null;
     this.synth?.cancel();
   }
-  enqueue(text, priority = 1) {
-    if (!this.enabled || !text) return;
-    this.items.push({ text, priority, at: Date.now() });
+  clear() {
+    this.items = [];
+    this.cancelCurrent();
+  }
+  drop(key) {
+    this.items = this.items.filter((x) => x.key !== key);
+    if (this.current?.key === key) {
+      this.cancelCurrent();
+      this.drain();
+    }
+  }
+  enqueue(
+    text,
+    priority = 1,
+    { key = "", expiresAt = null, interrupt = false } = {},
+  ) {
+    if (
+      !this.enabled ||
+      !text ||
+      (expiresAt !== null && Date.now() >= expiresAt)
+    )
+      return;
+    if (
+      key &&
+      (this.current?.key === key || this.items.some((x) => x.key === key))
+    )
+      return;
+    const message = { text, priority, at: Date.now(), key, expiresAt };
+    if (interrupt) {
+      const resume = this.current;
+      if (resume?.priority === 1) this.items.unshift(resume);
+      this.cancelCurrent();
+      this.items.unshift(message);
+    } else this.items.push(message);
     if (this.items.length > 30) {
       const low = this.items.findIndex((x) => x.priority === 0);
-      this.items.splice(low < 0 ? 0 : low, 1);
+      this.items.splice(low < 0 ? this.items.length - 1 : low, 1);
     }
     this.drain();
   }
   drain() {
     if (!this.enabled || this.busy || !this.items.length) return;
+    this.items = this.items.filter(
+      (x) =>
+        Date.now() - x.at <= 90000 &&
+        (x.expiresAt === null || x.expiresAt > Date.now()),
+    );
+    if (!this.items.length) return;
     if (!this.synth) {
       this.onWarning("Trình duyệt chưa hỗ trợ giọng đọc");
       return;
@@ -48,12 +86,10 @@ window.RewardVoice = class {
       this.onWarning("Máy chưa cài giọng tiếng Việt");
       return;
     }
-    while (this.items.length && Date.now() - this.items[0].at > 90000)
-      this.items.shift();
-    if (!this.items.length) return;
     const message = this.items.shift(),
       u = this.makeUtterance(message.text),
       generation = this.generation;
+    this.current = message;
     u.voice = voice;
     u.lang = voice.lang;
     u.rate = 1.04;
@@ -65,18 +101,24 @@ window.RewardVoice = class {
       done = true;
       clearTimeout(this.timer);
       this.busy = false;
-      if (error)
-        this.onWarning(
-          "Giọng đọc bị gián đoạn; đang đọc phần thưởng tiếp theo",
-        );
+      this.current = null;
+      if (
+        error &&
+        (message.expiresAt === null || Date.now() < message.expiresAt)
+      )
+        this.onWarning("Giọng đọc bị gián đoạn; đang đọc phần tiếp theo");
       this.drain();
     };
     u.onend = () => finish(false);
     u.onerror = () => finish(true);
+    const timeout =
+      message.expiresAt === null
+        ? 45000
+        : Math.max(1, Math.min(45000, message.expiresAt - Date.now()));
     this.timer = setTimeout(() => {
       this.synth.cancel();
       finish(true);
-    }, 45000);
+    }, timeout);
     try {
       this.synth.speak(u);
     } catch {

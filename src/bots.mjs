@@ -13,12 +13,14 @@ const names = [
   "Thùy Linh",
 ];
 export class Bots {
-  constructor(game) {
-    this.game = game;
+  constructor(game, { now = Date.now, random = Math.random } = {}) {
+    Object.assign(this, { game, now, random });
     this.enabled = false;
     this.target = 12;
     this.next = 0;
     this.serial = 0;
+    this.nextJoinAt = null;
+    this.pausedAt = null;
   }
   configure(on, count = 12) {
     if (!Number.isInteger(Number(count)) || count < 1 || count > 100)
@@ -26,6 +28,8 @@ export class Bots {
     this.enabled = !!on;
     this.target = Number(count);
     this.next = 0;
+    this.nextJoinAt = this.enabled ? this.now() + 180000 : null;
+    this.pausedAt = this.game.paused ? this.now() : null;
     if (on) {
       const list = [...this.game.users.values()].filter(
         (p) => p.demo && p.id.startsWith("bot-"),
@@ -39,6 +43,7 @@ export class Bots {
   }
   fill() {
     const g = this.game;
+    if (g.paused) return;
     let list = [...g.users.values()].filter(
       (p) => p.demo && p.id.startsWith("bot-"),
     );
@@ -51,34 +56,60 @@ export class Bots {
             (n > 12 ? " " + Math.ceil(n / 12) : ""),
           demo: true,
         };
-      g.comment(p, g.provinces[Math.floor(Math.random() * 34)].name);
+      g.comment(
+        p,
+        g.provinces[Math.floor(this.random() * g.provinces.length)].name,
+      );
       list.push(p);
     }
   }
   tick() {
     const g = this.game;
-    if (!this.enabled || g.paused) return;
+    if (!this.enabled) return;
+    if (g.paused) {
+      this.pausedAt ??= g.pauseAt ?? this.now();
+      return;
+    }
+    if (this.pausedAt !== null) {
+      const delta = this.now() - this.pausedAt;
+      this.nextJoinAt += delta;
+      this.next += delta;
+      this.pausedAt = null;
+    }
+    if (this.nextJoinAt !== null && this.now() >= this.nextJoinAt) {
+      this.target = Math.min(
+        100,
+        this.target + 1 + Math.floor(this.random() * 2),
+      );
+      this.nextJoinAt = this.now() + 180000;
+    }
     this.fill();
-    if (Date.now() < this.next) return;
-    this.next = Date.now() + 1800 + Math.random() * 3200;
+    if (this.now() < this.next) return;
+    this.next = this.now() + 1800 + this.random() * 3200;
     const list = [...g.users.values()].filter(
       (p) => p.demo && p.id.startsWith("bot-"),
     );
-    const p = list[Math.floor(Math.random() * list.length)];
+    const p = list[Math.floor(this.random() * list.length)];
     if (!p) return;
-    const chance = Math.random();
-    if (chance < 0.65) g.like(p, 10 + Math.floor(Math.random() * 40));
+    const chance = this.random();
+    if (chance < 0.65) g.like(p, 10 + Math.floor(this.random() * 40));
     else if (chance < 0.85)
       g.gift(p, {
-        giftId: "demo-" + Date.now(),
+        giftId: "demo-" + this.now(),
         name: "Hoa hồng",
         coins: 1,
         count: 1,
       });
-    else g.comment(p, g.provinces[Math.floor(Math.random() * 34)].name);
+    else
+      g.comment(
+        p,
+        g.provinces[Math.floor(this.random() * g.provinces.length)].name,
+      );
   }
   clear() {
     this.enabled = false;
+    this.nextJoinAt = null;
+    this.pausedAt = null;
     this.game.clearDemo();
   }
 }

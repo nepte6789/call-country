@@ -30,7 +30,10 @@ function render(m) {
     ? "✓ Đã nạp API key EulerStream trên server"
     : "Chưa có API key EulerStream (chỉ cần nếu dịch vụ ký yêu cầu).";
   $("pause").textContent = g.paused ? "Tiếp tục" : "Tạm dừng";
+  $("tryQuiz").disabled = g.quiz.phase === "rest" || g.paused;
   $("bots").textContent = m.bots.enabled ? "Tắt người thử" : "Bật người thử";
+  if (document.activeElement !== $("botCount"))
+    $("botCount").value = m.bots.count;
   $("roundTitle").textContent = "Bảng xếp hạng · Ván " + g.round;
   for (const key of ["minutes", "likesPerPoint", "coinPoints", "followPoints"])
     if (
@@ -184,7 +187,7 @@ $("quizSettings").onsubmit = (e) => {
 $("nextQuiz").onclick = () => send("nextQuiz");
 $("tryQuiz").onclick = () => {
   const q = questionBank.find((q) => q.id === state?.game.quiz.questionId);
-  if (q)
+  if (q && state.game.quiz.phase === "question")
     send("simulate", {
       kind: "comment",
       name: $("simName").value,
@@ -230,5 +233,10 @@ setInterval(() => {
       Math.ceil((g.quiz.deadline - (g.paused ? g.pauseAt : Date.now())) / 1000),
     );
   $("quizCurrentStatus").textContent =
-    `${g.quiz.category} · Câu ${g.quiz.number}/${g.quiz.total} · ${remaining} giây · Đúng +${g.quiz.reward} điểm`;
+    `${g.quiz.category} · Câu ${g.quiz.number}/${g.quiz.total} · ${g.quiz.phase === "rest" ? "Đang nghỉ" : "Trả lời"} ${remaining} giây · Đúng +${g.quiz.reward} điểm`;
+  $("tryQuiz").disabled = g.quiz.phase === "rest" || g.paused;
+  const bots = state.bots;
+  $("botGrowthStatus").textContent = bots.enabled
+    ? `${bots.active} người thử hiện tại · ${g.paused ? "Tạm dừng thêm người" : bots.count >= 100 ? "Đã đạt giới hạn 100" : `Thêm 1–2 người sau ${Math.max(0, Math.ceil((bots.nextJoinAt - Date.now()) / 1000))} giây`}`
+    : "Đã tắt tự thêm người thử";
 }, 250);

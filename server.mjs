@@ -53,7 +53,15 @@ function envelope() {
     t: "state",
     game: game.snapshot(),
     live: { ...live },
-    bots: { enabled: bots.enabled, count: bots.target },
+    bots: {
+      enabled: bots.enabled,
+      count: bots.target,
+      active: [...game.users.values()].filter(
+        (u) => u.demo && u.id.startsWith("bot-"),
+      ).length,
+      nextJoinAt: bots.nextJoinAt,
+      pausedAt: bots.pausedAt,
+    },
     auto: auto.state,
     hasApiKey: !!process.env.EULERSTREAM_API_KEY,
     logs,

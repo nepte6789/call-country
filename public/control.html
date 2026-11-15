@@ -101,8 +101,9 @@
           </div>
         </form>
         <p class="hint">
-          Hết thời gian sẽ lưu quê dẫn đầu rồi tự mở ván mới. Câu đố đổi mỗi 60
-          giây, trả lời đúng +10 điểm. Mỗi người nhận điểm câu đố một lần.
+          Hết thời gian sẽ lưu quê dẫn đầu rồi tự mở ván mới. Mỗi câu có 20 giây
+          đọc và trả lời, sau đó nghỉ 10 giây. Trả lời đúng +10 điểm. Mỗi người
+          nhận điểm câu đố một lần.
         </p>
       </section>
       <section class="card">
@@ -135,9 +136,10 @@
           ><button id="bots">Bật người thử</button
           ><button id="clearDemo" class="danger">Xóa toàn bộ người thử</button>
         </div>
+        <p id="botGrowthStatus" class="hint"></p>
         <p class="hint">
-          Người thử chỉ hoạt động trong game, không gửi bình luận hoặc quà lên
-          TikTok.
+          Khi bật, cứ 3 phút thêm ngẫu nhiên 1–2 người thử, tối đa 100. Người
+          thử chỉ hoạt động trong game, không gửi bình luận hoặc quà lên TikTok.
         </p>
       </section>
       <section class="card">
@@ -153,6 +155,10 @@
           Nhận chữ có dấu hoặc không dấu; không cần A/B/C/D. Mỗi người nhận
           thưởng một lần cho mỗi câu. Trả lời đúng không đổi quê đã chọn.
         </p>
+        <p class="hint">
+          Bấm bật giọng đọc ở màn hình LIVE để nghe câu hỏi ngay khi mở. Hết giờ
+          hiển thị đáp án và nghỉ 10 giây trước câu tiếp theo.
+        </p>
         <form id="quizSettings">
           <div class="quiz-settings-row">
             <label
@@ -165,7 +171,7 @@
                 type="number"
                 min="10"
                 max="180"
-                value="60" /></label
+                value="20" /></label
             ><label
               >Điểm trả lời đúng<input
                 id="quizPoints"
