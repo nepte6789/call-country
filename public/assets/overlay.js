@@ -17,7 +17,9 @@ let provinces = [],
   spotUntil = 0,
   voice = false,
   renderKey = "",
-  lastRound = 0;
+  lastRound = 0,
+  spokenQuizKey = "",
+  spokenRestKey = "";
 const paths = new Map();
 function svg(tag, attrs = {}) {
   const el = document.createElementNS(NS, tag);
@@ -92,8 +94,32 @@ const rewardVoice = new RewardVoice({
     $("sound").textContent = text;
   },
 });
-function speak(text, priority = 1) {
-  rewardVoice.enqueue(text, priority);
+function speak(text, priority = 1, options = {}) {
+  rewardVoice.enqueue(text, priority, options);
+}
+function readQuizSpeech() {
+  if (!voice || !state || state.game.paused) return;
+  const q = state.game.quiz,
+    key = `quiz-${state.game.round}-${q.id}`,
+    expiresAt = q.deadline - offset;
+  if (Date.now() >= expiresAt) return;
+  if (q.phase === "question" && spokenQuizKey !== key) {
+    if (spokenQuizKey) rewardVoice.drop(spokenQuizKey);
+    spokenQuizKey = key;
+    speak(
+      `Câu hỏi. ${q.category === "Toán nhẩm" ? q.prompt.replace(/\+/g, " cộng ").replace(/-/g, " trừ ").replace(/×/g, " nhân ").replace(/:/g, " chia ").replace(/=/g, " bằng ").replace(/\s+/g, " ").trim() : q.prompt} Bình luận đáp án trong ${Math.max(1, Math.ceil((expiresAt - Date.now()) / 1000))} giây.`,
+      2,
+      { key, expiresAt, interrupt: true },
+    );
+  } else if (q.phase === "rest" && spokenRestKey !== key) {
+    if (spokenQuizKey) rewardVoice.drop(spokenQuizKey);
+    spokenRestKey = key;
+    speak(
+      `Hết giờ. Đáp án là ${q.answer}. Nghỉ mười giây trước câu tiếp theo.`,
+      2,
+      { key: key + "-rest", expiresAt, interrupt: true },
+    );
+  }
 }
 function showEvent(e) {
   if (e.type === "visit" || e.type === "join" || e.type === "light") {
@@ -280,9 +306,20 @@ function render(m) {
   $("quizMeta").textContent =
     `${g.quiz.category} · Câu ${g.quiz.number}/${g.quiz.total}`;
   $("quizReward").textContent =
-    `Bình luận đáp án tiếng Việt hoặc số · Đúng +${g.quiz.reward} điểm`;
+    g.quiz.phase === "rest"
+      ? "Đã hết giờ trả lời · Đang nghỉ 10 giây"
+      : `Bình luận đáp án tiếng Việt hoặc số · Đúng +${g.quiz.reward} điểm`;
+  $("quizTime").textContent = Math.max(
+    0,
+    Math.ceil((g.quiz.deadline - (g.paused ? g.pauseAt : g.serverTime)) / 1000),
+  );
+  $("quizState").textContent =
+    g.quiz.phase === "rest" ? "NGHỈ GIỮA CÂU" : "ĐANG TRẢ LỜI";
+  document
+    .querySelector(".quiz")
+    .classList.toggle("resting", g.quiz.phase === "rest");
   $("quizPrevious").textContent = g.quiz.previous
-    ? `Đáp án câu trước: ${g.quiz.previous.answer}`
+    ? `${g.quiz.phase === "rest" ? "Đáp án" : "Đáp án câu trước"}: ${g.quiz.previous.answer}`
     : "";
   $("previousWinner").textContent = g.lastWinner
     ? `Dẫn đầu ván trước: ${g.lastWinner.name} · ${g.lastWinner.points}đ`
@@ -316,6 +353,7 @@ function render(m) {
     lastEvent = Math.max(...fresh.map((e) => e.id));
     for (const e of fresh) showEvent(e);
   }
+  readQuizSpeech();
   $("connection").textContent =
     m.live.status === "connected"
       ? `● TikTok @${m.live.channel} · ${m.live.comments} bình luận`
@@ -357,8 +395,10 @@ setInterval(() => {
 $("sound").onclick = () => {
   voice = !voice;
   rewardVoice.setEnabled(voice);
-  $("sound").textContent = voice ? "🔊 Lời chào: BẬT" : "🔇 Lời chào: TẮT";
-  if (voice) speak("Cùng thắp sáng Việt Nam, bình luận tên quê của bạn nhé.");
+  $("sound").textContent = voice ? "🔊 Giọng đọc: BẬT" : "🔇 Giọng đọc: TẮT";
+  spokenQuizKey = "";
+  spokenRestKey = "";
+  if (voice) readQuizSpeech();
 };
 const socket = new LiveSocket(
   "overlay",

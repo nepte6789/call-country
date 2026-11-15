@@ -38,11 +38,11 @@ PORT=3000
 - Mỗi **1 xu quà = 1 điểm**, nhân số quà. Combo chỉ cộng phần tăng mới, không cộng lại khi sự kiện kết thúc combo đến. Không mua/bán hoặc phát quà bằng ứng dụng.
 - Follow +5 điểm, một lần/người/ván. Hệ số tim/xu/follow chỉnh được trong bảng điều khiển.
 - Tim/quà trước khi chọn quê được giữ chờ. Bình luận tên quê để chuyển điểm về quê đó.
-- Bộ 60 câu đơn giản / 6 chủ đề: Việt Nam, Toán nhẩm, Đời sống, Con vật, Ăn uống, Thiên nhiên. Bình luận đáp án tiếng Việt (có dấu/không dấu) hoặc số, không cần A/B/C/D. Mặc định 60 giây/câu và đúng +10 điểm, mỗi người một lần/câu. Trong bảng điều khiển, mục “Câu hỏi cộng điểm” có toàn bộ câu/đáp án, lọc, tải JSON, đổi chủ đề, chỉnh 10–180 giây/câu và điểm thưởng, chuyển câu thủ công. Trên overlay, khung Đố vui quê mình nằm bên phải dưới xếp hạng, có hướng dẫn trả lời và đáp án câu trước sau khi hết giờ.
+- Bộ 60 câu đơn giản / 6 chủ đề: Việt Nam, Toán nhẩm, Đời sống, Con vật, Ăn uống, Thiên nhiên. Bình luận đáp án tiếng Việt (có dấu/không dấu) hoặc số, không cần A/B/C/D. Mặc định 20 giây/câu để đọc và trả lời, sau đó nghỉ 10 giây hiển thị đáp án; đúng +10 điểm, mỗi người một lần/câu. Trong bảng điều khiển, mục “Câu hỏi cộng điểm” có toàn bộ câu/đáp án, lọc, tải JSON, đổi chủ đề, chỉnh 10–180 giây/câu và điểm thưởng, chuyển câu thủ công. Trên overlay, khung Đố vui quê mình nằm bên phải dưới xếp hạng, có hướng dẫn trả lời và đáp án khi hết giờ và đếm ngược nghỉ 10 giây.
 - Ván mặc định 20 phút, tự ghi quê dẫn đầu rồi mở ván mới. Tạm dừng thì ngừng nhận điểm và giữ đồng hồ. Đổi thời gian sẽ đếm lại ván từ lúc lưu.
-- Có 1–100 người thử, tự chọn quê/thả tim/tặng quà mô phỏng. Xóa người thử chỉ trừ đóng góp của người thử, giữ điểm người thật. Không tạo bình luận/tim/quà hoặc người xem trên TikTok.
+- Có 1–100 người thử, tự chọn quê/thả tim/tặng quà mô phỏng. Khi bật người thử, lấy số lượng khởi đầu đã đặt (mặc định 12), rồi cứ 3 phút tăng thêm ngẫu nhiên 1–2 người, tối đa 100. Khi tạm dừng, đồng hồ thêm người cũng dừng; tắt hoặc xóa người thử sẽ dừng lịch tự thêm. Xóa người thử chỉ trừ đóng góp của người thử, giữ điểm người thật. Không tạo bình luận/tim/quà hoặc người xem trên TikTok.
 
-Bấm “Bật lời chào quê nhà” để đọc chào người mới, quà, câu trả lời đúng và thưởng theo dõi bằng giọng Việt cài trên trình duyệt/máy. Không có giọng Việt thì giao diện vẫn hoạt động; không tự tải giọng từ dịch vụ bên ngoài. Không kèm nhạc có bản quyền hoặc âm thanh từ hai video mẫu.
+Bấm “Bật đọc câu hỏi và phần thưởng” để đọc chào người mới, quà, câu trả lời đúng và thưởng theo dõi bằng giọng Việt cài trên trình duyệt/máy. Không có giọng Việt thì giao diện vẫn hoạt động; không tự tải giọng từ dịch vụ bên ngoài. Không kèm nhạc có bản quyền hoặc âm thanh từ hai video mẫu.
 
 ## Dữ liệu bản đồ
 
@@ -63,3 +63,9 @@ Kiểm tra bản đầu: 9 kiểm thử tự động đạt; kiểm tra HTTP/Web
 Lời đọc phần thưởng dùng câu tiếng Việt riêng, không đọc chuỗi ký hiệu giao diện. Ví dụ: “Cảm ơn Minh Anh đã tặng 10 bông hoa hồng. Quê Gia Lai được cộng thêm 10 điểm.” Nếu chưa chọn quê thì nhắc điểm đang chờ. Lời đọc được xếp hàng, không ghi đè khi có hai phần thưởng liên tiếp; hàng đợi giới hạn 30 lời, bỏ lời cũ quá 90 giây để tránh giọng đọc trễ kéo dài. Cần cài giọng Việt trên máy; ứng dụng không tự tải TTS trực tuyến.
 
 Trả lời đúng một câu có đáp án trùng tên tỉnh/thành sẽ giữ quê đã chọn, ví dụ đang chọn Hà Tĩnh và trả lời “Hà Nội” cho câu thủ đô thì điểm thưởng vẫn về Hà Tĩnh. Dùng “quê tôi Hà Nội” nếu muốn đổi quê chủ động.
+
+### Nhịp câu hỏi 20 + 10
+
+Bấm bật giọng trên overlay để đọc câu hỏi ngay khi mở. Phần đọc nằm trong 20 giây trả lời, không cộng thêm thời gian sau khi đọc xong. Giọng đọc câu hỏi được ưu tiên hơn phần cảm ơn đang chờ; nếu đang đọc dở một lời thưởng, lời đó được giữ lại để đọc tiếp từ đầu sau câu hỏi. Không đọc tiếp một câu hỏi đã hết giờ.
+
+Hết 20 giây: ngừng chấm câu hỏi đó, công bố đáp án và nghỉ 10 giây. Hết 10 giây mới mở câu tiếp theo. Tim, quà và chọn quê vẫn hoạt động trong khoảng nghỉ; đáp án gửi lúc nghỉ không có điểm câu hỏi. Nút “Câu tiếp theo” của người điều khiển có thể chủ động bỏ qua thời gian nghỉ.

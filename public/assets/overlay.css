@@ -622,3 +622,29 @@ footer {
   border-color: #e5b65b;
   box-shadow: 0 0 25px #ffbe3311;
 }
+
+.quiz .quiz-state {
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8be1c6;
+  padding: 0;
+  margin-top: 12px;
+}
+.quiz.resting .quiz-state {
+  color: #ffe09b;
+}
+.quiz.resting #quizTime {
+  color: #ffe09b;
+}
+.quiz.resting .quiz-previous {
+  font-size: 18px;
+}
+.quiz.resting #quizReward {
+  color: #8ba4b7;
+}
