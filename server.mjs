@@ -87,6 +87,7 @@ const mime = {
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".woff": "font/woff",
+  ".ttf": "font/ttf",
 };
 const server = http.createServer((req, res) => {
   if (!valid(req)) {
