@@ -11,4 +11,6 @@ geoBoundaries reference: Runfola et al. (2020), geoBoundaries: A global database
 
 `provinces.json` includes generated SVG paths and representative points; no runtime map service/API key required. Regenerate using `scripts/build-map.py source.geojson` with Python/Shapely.
 
-Font: Nunito Sans, SIL Open Font License, bundled in public/assets/fonts.
+Font: Be Vietnam Pro, SIL Open Font License, bundled in public/assets/fonts.
+
+Be Vietnam Pro font source: https://github.com/google/fonts/tree/main/ofl/bevietnampro . Copyright 2021 The Be Vietnam Pro Project Authors, SIL OFL 1.1; full license in public/assets/fonts/OFL.txt. Bundled complete TTFs (400/700/800/900), including Vietnamese glyphs.

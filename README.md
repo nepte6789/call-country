@@ -46,7 +46,7 @@ Bấm “Bật lời chào quê nhà” để đọc chào người mới/quà b
 
 ## Dữ liệu bản đồ
 
-34 vùng được gộp theo tên tỉnh/thành sau sáp nhập 2025, từ bộ hình học nguồn cũ geoBoundaries Public Domain; bản đồ được đơn giản hoá để làm game, **không phải dữ liệu địa giới hành chính chính thức hiện hành**. Nguồn không biểu diễn đầy đủ các khu vực ngoài khơi. Xem [data/SOURCES.md](data/SOURCES.md) cho nguồn, giới hạn và cách tạo lại dữ liệu. Bản đồ chạy local, không cần API bản đồ. Font Nunito Sans kèm giấy phép OFL.
+34 vùng được gộp theo tên tỉnh/thành sau sáp nhập 2025, từ bộ hình học nguồn cũ geoBoundaries Public Domain; bản đồ được đơn giản hoá để làm game, **không phải dữ liệu địa giới hành chính chính thức hiện hành**. Nguồn không biểu diễn đầy đủ các khu vực ngoài khơi. Xem [data/SOURCES.md](data/SOURCES.md) cho nguồn, giới hạn và cách tạo lại dữ liệu. Bản đồ chạy local, không cần API bản đồ. Font Be Vietnam Pro kèm giấy phép OFL.
 
 ## Kiểm tra / cấu trúc
 
